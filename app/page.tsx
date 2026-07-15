@@ -11,6 +11,11 @@ type DesktopApp = "folder" | "tickets" | "recycle" | "notes";
 type IntroPackItem = "laptop" | "books" | "folder" | "calendar" | "lamp" | "keyboard" | "mp3" | "phone" | "mouse" | "cup" | "scarf";
 type GuidePhoneView = "home" | "wechatList" | "chat";
 
+type IntroMemory = {
+  title: string;
+  lines: string[];
+};
+
 type Memory = {
   id: MemoryId;
   title: string;
@@ -92,16 +97,16 @@ const memories: Memory[] = [
   },
   {
     id: "mp3",
-    title: "旧 MP3",
-    place: "她的录音",
-    summary: "分手前寄回来的银色 MP3，里面有两段她忘了删的声音。",
+    title: "蓝牙耳机盒",
+    place: "没发出的语音",
+    summary: "分手前寄回来的蓝牙耳机盒，里面夹着一张写着语音备份链接的小纸条。",
     lines: [
-      "给你的.mp3：以后你去北京了、我回南京了，翻到这个，还能想起来：2024 年的南京，秋天，有个人挺喜欢你的。",
-      "给自己.mp3：又加班到这个点。想给他打电话。他肯定睡了。",
+      "语音备份 01：以后你去北京了、我回南京了，听到这个，还能想起来：2024 年的南京，秋天，有个人挺喜欢你的。",
+      "语音备份 02：又加班到这个点。想给他打电话。他肯定睡了。",
       "她说：我今天路过一家店，招牌上写着“南京大牌档”。在门口站了一会儿。没进去。",
       "她说：北京也好冷。但北京没有梧桐树。算了。不说了。我好累啊。"
     ],
-    note: "这段录音她存了草稿，没有发给你。她忘了删。"
+    note: "这些语音她存进了备份链接，没有发给你。她以为自己以后会发。"
   },
   {
     id: "recycle",
@@ -149,9 +154,9 @@ const guidedBeats: GuidedBeat[] = [
     memoryId: "mp3",
     time: "00:03",
     title: "周也",
-    message: "那个银色 MP3，你不要再当成杂物了。里面有些话，我当时没来得及发给你。",
-    cta: "播放 MP3 录音",
-    after: "录音的电流声很轻，她的声音从很远的地方回来。"
+    message: "那个蓝牙耳机盒，你不要再当成杂物了。里面夹着一张小纸条，有些话我当时没来得及发给你。",
+    cta: "打开语音备份",
+    after: "耳机盒的指示灯亮了一下，她的声音从很远的地方回来。"
   },
   {
     memoryId: "recycle",
@@ -286,6 +291,145 @@ const finalChoices = [
   "我会记得南京的秋天。",
   "那时候没说完的话，现在说也晚了。但我确实很爱过你。"
 ];
+
+const introMemories: Record<IntroPackItem, IntroMemory> = {
+  folder: {
+    title: "高铁票根",
+    lines: [
+      "拉开抽屉的时候，一叠纸片散了出来。",
+      "高铁票。北京南和南京南。五张。",
+      "她来了一次。我去了四次。不对，应该是我买了四次票。有一次退了。",
+      "那天她在回龙观发烧。我买了票，然后看到她朋友圈说退烧了。",
+      "我点了退票。退票时间是晚上 11 点 47 分。",
+      "同一时间，她在输液室给我发：多喝热水。我回的是：你也是。",
+      "五张票根。但真正见到她的次数，比票根少一次。",
+      "走吧。早晚要收的。"
+    ]
+  },
+  phone: {
+    title: "手机",
+    lines: [
+      "手机没电了。插上电，屏幕亮了。",
+      "停在一个聊天界面上。我和她的。",
+      "最后一条消息停在 2026 年 1 月。",
+      "三年。从 2024 年 6 月到 2026 年 1 月。我往上翻了一下。",
+      "从 2025 年 7 月开始，我回她的消息，越来越短。",
+      "她：我哪儿也不想去。就想等你来了看见你。",
+      "我：你别坐那儿。",
+      "她：要不……我们先分开吧。我：好。",
+      "我以为那是我在的意思。她以为那是我不在的意思。",
+      "留着吧。不删了。"
+    ]
+  },
+  books: {
+    title: "她送的书",
+    lines: [
+      "书架角落里有一本书。硬壳，不厚。",
+      "扉页有她的字：毕业快乐。以后也要好好的。",
+      "这句话像是她在跟我说再见。",
+      "2025 年 6 月，她就已经在说再见了。我没听出来。",
+      "她当时把书递给我，说：以后你一个人在南京，看着点书，别老打游戏了。",
+      "我只说了谢谢。",
+      "现在我知道她在等什么了。她在等我问：那你呢？你在北京也要好好的。",
+      "我没问。"
+    ]
+  },
+  mp3: {
+    title: "蓝牙耳机盒",
+    lines: [
+      "桌角有个白色的蓝牙耳机盒。外壳边缘有点磨花。",
+      "她分手前寄还给我的。她说：这个你留着吧，我在北京又买了新的。",
+      "我一直没扔。但也很少打开。",
+      "今天打开才发现，盒盖里夹着一张很小的纸条，写着一个语音备份链接。",
+      "第一段里有风，有南京梧桐叶的声音。她说：2024 年的南京，秋天，有个人挺喜欢你的。",
+      "第二段很安静。她说：又加班到这个点。想给他打电话。他肯定睡了。",
+      "她说：我好累啊。说了三遍。",
+      "我把耳机盒合上了。今天不听了。"
+    ]
+  },
+  cup: {
+    title: "窗台空玻璃瓶",
+    lines: [
+      "窗台上有个空玻璃瓶。",
+      "以前插过花。她最后一次来南京的时候，带了一束。",
+      "花早就枯了。瓶子还留着。",
+      "她那个人就是这样，来一趟，总要带点东西。",
+      "花也好。书也好。",
+      "好像她走了之后，这些东西还能替她多留一会儿。",
+      "花枯了之后我没有扔掉瓶子。",
+      "可能只是舍不得扔。跟我舍不得删她的照片一样。"
+    ]
+  },
+  scarf: {
+    title: "没寄出去的明信片",
+    lines: [
+      "抽屉最底下，压着一沓旧纸。",
+      "翻到最后，是一张明信片。",
+      "背面是南京中山陵的梧桐大道。正面只有寥寥几笔。",
+      "这张明信片是我买的。2025 年秋天，她去北京之后。",
+      "第一行写的是：北京的秋天怎么样。",
+      "第二行写的是：南京的梧桐，叶子黄的有些旧了。",
+      "写到第三行，写不下去了。",
+      "我不知道该写什么。"
+    ]
+  },
+  calendar: {
+    title: "2024 年日历",
+    lines: [
+      "墙上贴着一张 2024 年的日历。",
+      "六月被画了一个圈。",
+      "6月的某一天，红笔圈了一个圈。旁边有一行很小很小的字：\"今天在一起了。\"",
+      "我搬了两次宿舍，这张日历一直跟着我。",
+      "我嘴上说着过去了过去了。",
+      "但手一直没有把它撕下来。",
+      "现在要搬走了。",
+      "这次真的得撕下来了。"
+    ]
+  },
+  laptop: {
+    title: "毕业.mp4",
+    lines: [
+      "收拾到电脑的时候，回收站里有一个视频文件。",
+      "名字叫：毕业.mp4。",
+      "我删过。不知道什么时候又恢复了。",
+      "视频里她举着手机拍我。她说：笑一个，今天毕业了。",
+      "她说：你以后别什么都闷在心里了。你想说什么就说。",
+      "我说：我尽量。",
+      "她说：又是尽量。行吧。但我还是喜欢你。",
+      "最后三秒画面暗了，她轻声说：要是有你在北京就好了。",
+      "这句话我记得，比我想象的更久。"
+    ]
+  },
+  keyboard: {
+    title: "键盘",
+    lines: [
+      "键盘缝里还有灰。很多年没认真清过。",
+      "我用它写过很多攻略、论文、邮件，也删过很多没发出去的话。",
+      "有些话打出来的时候很轻，删掉的时候却很重。",
+      "我总以为等准备好了再说。",
+      "后来才知道，很多话等不到准备好。"
+    ]
+  },
+  mouse: {
+    title: "鼠标",
+    lines: [
+      "鼠标左键有点松。",
+      "买票、退票、收藏攻略、删除视频，都是这只手点下去的。",
+      "动作太轻了，轻得像什么都没发生。",
+      "可有些点击，会在几年后才响起来。"
+    ]
+  },
+  lamp: {
+    title: "台灯",
+    lines: [
+      "台灯还亮着。",
+      "很多个深夜，我坐在这盏灯下面，想着给她发点什么。",
+      "最后发出去的总是很短。",
+      "辛苦了。早点睡。多喝热水。",
+      "我以为这些够了。其实不够。"
+    ]
+  }
+};
 
 function cx(...classes: Array<string | false | undefined>) {
   return classes.filter(Boolean).join(" ");
@@ -455,8 +599,8 @@ function DesktopMemory({ memory, markSeen }: { memory: Memory; markSeen: () => v
   );
 }
 
-function PhoneMemory({ markSeen }: { markSeen: () => void }) {
-  const [phoneApp, setPhoneApp] = useState<PhoneApp>("home");
+function PhoneMemory({ markSeen, initialApp = "home", compact = false }: { markSeen: () => void; initialApp?: PhoneApp; compact?: boolean }) {
+  const [phoneApp, setPhoneApp] = useState<PhoneApp>(initialApp);
 
   function openPhoneApp(app: PhoneApp) {
     setPhoneApp(app);
@@ -464,7 +608,7 @@ function PhoneMemory({ markSeen }: { markSeen: () => void }) {
   }
 
   return (
-    <div className="phoneOS">
+    <div className={cx("phoneOS", compact && "compactPhoneMemory")}>
       <div className="phoneFrame">
         <div className="phoneStatus"><span>23:47</span><span>5G 62%</span></div>
         <div className="phoneScreen">
@@ -523,7 +667,7 @@ function PhoneMemory({ markSeen }: { markSeen: () => void }) {
                 <button type="button">南京南站</button>
                 <button type="button">花坛</button>
                 <button type="button">汤包</button>
-                <button type="button">旧 MP3</button>
+                <button type="button">语音备份</button>
               </div>
             </div>
           )}
@@ -690,6 +834,9 @@ export default function Home() {
   const [introPackNarrationVisible, setIntroPackNarrationVisible] = useState(true);
   const [introPhotoLineIndex, setIntroPhotoLineIndex] = useState(0);
   const [packedIntroItems, setPackedIntroItems] = useState<IntroPackItem[]>([]);
+  const [activeIntroPackItem, setActiveIntroPackItem] = useState<IntroPackItem | null>(null);
+  const [introMemoryLineIndex, setIntroMemoryLineIndex] = useState(0);
+  const [postcardFlipped, setPostcardFlipped] = useState(false);
   const [openedMemory, setOpenedMemory] = useState<Memory | null>(null);
   const [seenMemories, setSeenMemories] = useState<MemoryId[]>([]);
   const [nodeIndex, setNodeIndex] = useState(0);
@@ -738,10 +885,10 @@ export default function Home() {
   const introPackedCount = packedIntroItems.length;
   const introPackedDone = introPackedCount === introPackItems.length;
   const introPhotoLines: VnLine[] = [
-    { speaker: "我", text: "2027年6月。研究生毕业。", kind: "narration" },
+    { speaker: "我", text: "现在2027年6月了。我也毕业了。", kind: "narration" },
     { speaker: "我", text: "我在这间宿舍住了两年。现在要搬走了。", kind: "narration" },
-    { speaker: "我", text: "收拾东西的时候，翻到这张照片——2024年夏天。", kind: "narration" },
     { speaker: "我", text: "南京的夏天很热，她的头发黏在脸上，但笑得很好看。", kind: "narration" },
+    { speaker: "我", text: "她的那半张脸有点脏了。我拿袖子擦了擦，擦不掉。", kind: "narration" },
     { speaker: "我", text: "我坐在电脑前面，看了很久。", kind: "narration" },
     { speaker: "我", text: "然后屏幕花了。", kind: "narration" },
     { speaker: "", text: "电脑屏幕出现波纹。照片变成模糊的噪点。", kind: "system" },
@@ -749,6 +896,8 @@ export default function Home() {
     { speaker: "", text: "你现在看到的是 2024 年。你还要回去吗？", kind: "system" }
   ];
   const currentIntroPhotoLine = introPhotoLines[Math.min(introPhotoLineIndex, introPhotoLines.length - 1)];
+  const activeIntroMemory = activeIntroPackItem ? introMemories[activeIntroPackItem] : null;
+  const currentIntroMemoryLine = activeIntroMemory?.lines[Math.min(introMemoryLineIndex, activeIntroMemory.lines.length - 1)];
   const introPackLine = introPackedDone
     ? "东西都收进去了。桌上只剩下那张照片。"
     : "旧书、文件夹和零碎的小东西还散在房间里。先把它们收进箱子。";
@@ -787,6 +936,11 @@ export default function Home() {
     setGuidePhoneOpen(true);
   }
 
+  function getGuidedOptionText(beat: GuidedBeat) {
+    if (beat.memoryId === "phone") return "查看旧手机里的聊天记录";
+    return beat.cta;
+  }
+
   function chooseNode(choice: StoryChoice) {
     setActiveChoice(choice);
     setResponseLineIndex(0);
@@ -805,7 +959,24 @@ export default function Home() {
   }
 
   function packIntroItem(item: IntroPackItem) {
+    if (packedIntroItems.includes(item)) return;
+    setActiveIntroPackItem(item);
+    setIntroMemoryLineIndex(0);
+    setPostcardFlipped(false);
+    setIntroPackNarrationVisible(false);
+  }
+
+  function advanceIntroMemory() {
+    if (!activeIntroPackItem || !activeIntroMemory) return;
+    if (introMemoryLineIndex < activeIntroMemory.lines.length - 1) {
+      setIntroMemoryLineIndex((index) => index + 1);
+      return;
+    }
+    const item = activeIntroPackItem;
     setPackedIntroItems((current) => (current.includes(item) ? current : [...current, item]));
+    setActiveIntroPackItem(null);
+    setIntroMemoryLineIndex(0);
+    setPostcardFlipped(false);
   }
 
   function openIntroPhoto() {
@@ -822,6 +993,9 @@ export default function Home() {
     setIntroPhotoOpen(false);
     setIntroPhotoLineIndex(0);
     setPackedIntroItems([]);
+    setActiveIntroPackItem(null);
+    setIntroMemoryLineIndex(0);
+    setPostcardFlipped(false);
     setOpenedMemory(null);
     setSeenMemories([]);
     setNodeIndex(0);
@@ -863,7 +1037,6 @@ export default function Home() {
           {phase === "intro" && !introPhotoOpen && (
             <>
               <button onClick={() => setPackedIntroItems([])} type="button">重置收拾</button>
-              <button onClick={() => setPackedIntroItems(introPackItems)} type="button">一键收拾</button>
               <button disabled={!introPackedDone} onClick={openIntroPhoto} type="button">进入照片</button>
             </>
           )}
@@ -877,7 +1050,7 @@ export default function Home() {
           {!introPhotoOpen ? (
             <div className="introPackStage">
               <div className="introRoom" aria-label="2027 年 6 月，研究生宿舍">
-                <div className="introWindow" aria-hidden="true" />
+                <div className="introWindow" aria-hidden="true"><i /></div>
                 <div className="introShelf" aria-hidden="true" />
                 <div className="introPinboard" aria-hidden="true">
                   <span>北京—南京<br />1078 公里</span>
@@ -885,15 +1058,22 @@ export default function Home() {
                 </div>
                 <div className="introDesk">
                   <button className={cx("packItem spritePack introLaptop", packedIntroItems.includes("laptop") && "packed")} onClick={() => packIntroItem("laptop")} type="button" aria-label="把旧笔记本电脑放进箱子"><img src="/assets/items/monitor.png" alt="" draggable={false} /></button>
-                  <button className={cx("packItem spritePack introBook one", packedIntroItems.includes("books") && "packed")} onClick={() => packIntroItem("books")} type="button" aria-label="把旧书放进箱子"><img src="/assets/items/examBook.png" alt="" draggable={false} /></button>
-                  <button className={cx("packItem spritePack introFolder", packedIntroItems.includes("folder") && "packed")} onClick={() => packIntroItem("folder")} type="button" aria-label="把文件夹放进箱子"><img src="/assets/items/drawer.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem introBook one giftBook", packedIntroItems.includes("books") && "packed")} onClick={() => packIntroItem("books")} type="button" aria-label="把她送的书放进箱子"><span className="giftBookCover">以后也要<br />好好的</span><span className="giftBookSpine" /><span className="giftBookPages" /></button>
+                  <button className={cx("packItem spritePack introFolder", activeIntroPackItem === "folder" && "drawerOpen", packedIntroItems.includes("folder") && "packed")} onClick={() => packIntroItem("folder")} type="button" aria-label="拉开抽屉，拿出高铁票根">
+                    <img src="/assets/items/drawer.png" alt="" draggable={false} />
+                    <span className="ticketStubs" aria-hidden="true">
+                      <i>南京南</i>
+                      <i>北京南</i>
+                      <i>G23</i>
+                    </span>
+                  </button>
                   <button className={cx("packItem spritePack introLamp", packedIntroItems.includes("lamp") && "packed")} onClick={() => packIntroItem("lamp")} type="button" aria-label="把台灯放进箱子"><img src="/assets/items/lamp.png" alt="" draggable={false} /></button>
                   <button className={cx("packItem spritePack introKeyboard", packedIntroItems.includes("keyboard") && "packed")} onClick={() => packIntroItem("keyboard")} type="button" aria-label="把键盘放进箱子"><img src="/assets/items/keyboard.png" alt="" draggable={false} /></button>
-                  <button className={cx("packItem spritePack introMp3", packedIntroItems.includes("mp3") && "packed")} onClick={() => packIntroItem("mp3")} type="button" aria-label="把银色 MP3 放进箱子"><img src="/assets/items/mp3.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem introMp3 earbudCase", packedIntroItems.includes("mp3") && "packed")} onClick={() => packIntroItem("mp3")} type="button" aria-label="把蓝牙耳机盒放进箱子"><span className="earbudCaseLid" /><span className="earbud left" /><span className="earbud right" /><span className="earbudCaseLight" /></button>
                   <button className={cx("packItem spritePack introPhone", packedIntroItems.includes("phone") && "packed")} onClick={() => packIntroItem("phone")} type="button" aria-label="把手机放进箱子"><img src="/assets/items/phone.png" alt="" draggable={false} /></button>
                   <button className={cx("packItem spritePack introMouse", packedIntroItems.includes("mouse") && "packed")} onClick={() => packIntroItem("mouse")} type="button" aria-label="把鼠标放进箱子"><img src="/assets/items/mouse.png" alt="" draggable={false} /></button>
-                  <button className={cx("packItem spritePack introCup", packedIntroItems.includes("cup") && "packed")} onClick={() => packIntroItem("cup")} type="button" aria-label="把水杯放进箱子"><img src="/assets/items/tea.png" alt="" draggable={false} /></button>
-                  <button className={cx("packItem spritePack introScarf", packedIntroItems.includes("scarf") && "packed")} onClick={() => packIntroItem("scarf")} type="button" aria-label="把围巾放进箱子"><img src="/assets/items/cable.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem introCup", packedIntroItems.includes("cup") && "packed")} onClick={() => packIntroItem("cup")} type="button" aria-label="把空玻璃瓶放进箱子"><span className="glassBottleBody" /><span className="glassBottleNeck" /><span className="glassBottleShine" /></button>
+                  <button className={cx("packItem introScarf", packedIntroItems.includes("scarf") && "packed")} onClick={() => packIntroItem("scarf")} type="button" aria-label="把没寄出去的明信片放进箱子"><span className="postcardStamp" /><span className="postcardLines"><i /><i /><i /></span></button>
                 </div>
                 <button className={cx("packItem spritePack introCalendarLoose", packedIntroItems.includes("calendar") && "packed")} onClick={() => packIntroItem("calendar")} type="button" aria-label="把日历放进箱子"><img src="/assets/items/calendar.png" alt="" draggable={false} /></button>
                 <div className={cx("introStorageBox", introPackedCount > 0 && "hasItems", introPackedDone && "full")} aria-label={`已收进 ${introPackedCount} 件物品`} role="status">
@@ -920,10 +1100,57 @@ export default function Home() {
                   <span>{introPackedDone ? "双击照片" : "点击物品收拾"}</span>
                 </article>
               )}
+              {activeIntroMemory && (
+                <>
+                  {activeIntroPackItem === "calendar" && (
+                    <div className="calendarCloseup" aria-hidden="true">
+                      <div className="calendarCloseupHeader">
+                        <span>2024</span>
+                        <strong>6月</strong>
+                      </div>
+                      <div className="calendarCloseupGrid">
+                        {["一", "二", "三", "四", "五", "六", "日", "27", "28", "29", "30", "31", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23"].map((day, index) => (
+                          <span className={day === "6" ? "circledDay" : index < 7 ? "weekDay" : ""} key={`${day}-${index}`}>{day}</span>
+                        ))}
+                      </div>
+                      <p>今天在一起了。</p>
+                    </div>
+                  )}
+                  {activeIntroPackItem === "scarf" && (
+                    <button className={cx("postcardCloseup", postcardFlipped && "flipped")} onClick={() => setPostcardFlipped((flipped) => !flipped)} type="button" aria-label={postcardFlipped ? "翻到明信片背面" : "翻到明信片正面"}>
+                      <span className="postcardFace postcardBackFace">
+                        <span className="postcardMiniPicture" />
+                        <span className="postcardCloseupStamp" />
+                        <span className="postcardHandwriting">北京的秋天怎么样</span>
+                        <span className="postcardHandwriting">南京的梧桐，叶子黄的有些旧了</span>
+                        <span className="postcardEmptyLine" />
+                      </span>
+                      <span className="postcardFace postcardFrontFace">
+                        <span className="pixelRoad">
+                          <i /><i /><i /><i />
+                        </span>
+                        <span className="pixelPlaneLeft" />
+                        <span className="pixelPlaneRight" />
+                        <span className="pixelTreeLine left" />
+                        <span className="pixelTreeLine right" />
+                        <span className="pixelLeafCanopy" />
+                        <span className="pixelCar" />
+                        <span className="postcardFrontWords">中山陵 梧桐大道</span>
+                        <span className="postcardBlurWords">NANJING AUTUMN</span>
+                      </span>
+                    </button>
+                  )}
+                  <button className="visualNovelBox introMemoryDialogue" onClick={advanceIntroMemory} type="button">
+                    <span className="speakerName">{activeIntroMemory.title}</span>
+                    <p>{currentIntroMemoryLine}</p>
+                    <i>{introMemoryLineIndex < activeIntroMemory.lines.length - 1 ? "点击继续" : "收进纸箱"}</i>
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <article className="storyCard introScreen">
-              <p className="eyebrow">开场画面 / 第一次问</p>
+              <p className="eyebrow"></p>
               <div className={cx("fullscreenPhoto", introPhotoLineIndex >= 5 && "distorting")} aria-hidden="true">
                 <img className="memoryPhotoImage" src="/assets/story/summer-2024-couple-photo.png" alt="" draggable={false} />
                 <span className="photoNoise" />
@@ -940,7 +1167,11 @@ export default function Home() {
               </button>
               {introPhotoLineIndex === introPhotoLines.length - 1 && (
                 <div className="introChoiceLayer">
-                  <button onClick={() => setPhase("room")} type="button">是。等手机亮起来</button>
+                  <button onClick={() => {
+                    setVnLineIndex(0);
+                    setResponseLineIndex(0);
+                    setPhase("nodes");
+                  }} type="button">是。回到 2024 年</button>
                 </div>
               )}
             </article>
@@ -985,9 +1216,12 @@ export default function Home() {
                 <img className="itemSprite" src="/assets/items/phone.png" alt="" draggable={false} />
                 <span>手机</span>
               </button>
-              <button className={cx("mp3 item hasSprite memoryItem", seenMemories.includes("mp3") && "seen")} disabled type="button" aria-label="银色 MP3">
-                <img className="itemSprite" src="/assets/items/mp3.png" alt="" draggable={false} />
-                <span>银色 MP3</span>
+              <button className={cx("mp3 item memoryItem earbudCase", seenMemories.includes("mp3") && "seen")} disabled type="button" aria-label="蓝牙耳机盒">
+                <span className="earbudCaseLid" />
+                <span className="earbud left" />
+                <span className="earbud right" />
+                <span className="earbudCaseLight" />
+                <span>蓝牙耳机盒</span>
               </button>
               <button className="lamp item hasSprite" disabled aria-label="台灯" type="button">
                 <img className="itemSprite" src="/assets/items/lamp.png" alt="" draggable={false} />
@@ -1097,13 +1331,6 @@ export default function Home() {
                     <span>{guidedBeat?.time ?? "00:16"}</span>
                     <b>微信</b>
                   </div>
-                  <div className="mainlineChatHeader">
-                    <i>周</i>
-                    <div>
-                      <strong>{guidedBeat?.title ?? "周也"}</strong>
-                      <span>{guidedBeat ? `${guidedBeat.time} 发来一条消息` : "消息已读"}</span>
-                    </div>
-                  </div>
                   <div className="mainlineMessages">
                     {guidedBeats.slice(0, seenMemories.length).map((beat) => (
                       <p className="readMessage" key={beat.memoryId}>{beat.after}</p>
@@ -1120,9 +1347,9 @@ export default function Home() {
                     ))}
                   </div>
                   {guidedBeat ? (
-                    <button onClick={openGuidedBeat} type="button">{guidedBeat.cta}</button>
+                    <button className="chatOptionButton" onClick={openGuidedBeat} type="button">{getGuidedOptionText(guidedBeat)}</button>
                   ) : (
-                    <button onClick={() => {
+                    <button className="chatOptionButton" onClick={() => {
                       setGuidePhoneOpen(false);
                       setGuidePhoneView("home");
                       setSecondAskLineIndex(0);
@@ -1343,7 +1570,7 @@ export default function Home() {
             {openedMemory.id === "computer" ? (
               <DesktopMemory memory={openedMemory} markSeen={() => markMemorySeen("computer")} />
             ) : openedMemory.id === "phone" ? (
-              <PhoneMemory markSeen={() => markMemorySeen("phone")} />
+              <PhoneMemory markSeen={() => markMemorySeen("phone")} initialApp="zhouye" compact />
             ) : openedMemory.id === "recycle" ? (
               <GraduationVideoMemory memory={openedMemory} onClose={() => setOpenedMemory(null)} />
             ) : (
