@@ -1,184 +1,224 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 
-type ItemId =
-  | "monitor"
-  | "lol"
-  | "qq"
-  | "phone"
-  | "wechat"
-  | "netease"
-  | "mp3"
-  | "tv"
-  | "remote"
-  | "worldcup"
-  | "movie"
-  | "latiao"
-  | "tea"
-  | "spinner"
-  | "examBook"
-  | "novel"
-  | "calendar"
-  | "lamp"
-  | "window"
-  | "fan"
-  | "trash";
+type Phase = "intro" | "room" | "secondAsk" | "nodes" | "system" | "farewell" | "ending";
+type MemoryId = "computer" | "phone" | "mp3" | "recycle";
+type NodeId = "stadium" | "plane" | "station";
+type ChoiceKey = "A" | "B" | "C" | "D" | "E";
+type PhoneApp = "home" | "wechat" | "zhouye" | "moments" | "album" | "calendar";
+type DesktopApp = "folder" | "tickets" | "recycle" | "notes";
+type IntroPackItem = "laptop" | "books" | "folder" | "calendar" | "lamp" | "keyboard" | "mp3" | "phone" | "mouse" | "cup" | "scarf";
 
-type Popup = {
+type Memory = {
+  id: MemoryId;
   title: string;
-  tag: string;
-  body: string;
-  detail?: string;
-  kind?: "desktop" | "phone" | "music" | "tv" | "calendar" | "egg";
+  place: string;
+  summary: string;
+  lines: string[];
+  note: string;
 };
 
-type PhoneApp = "home" | "wechat" | "netease" | "weibo" | "douyin" | "album" | "calendar";
+type StoryChoice = {
+  key: ChoiceKey;
+  text: string;
+  response: string[];
+};
 
-const items: Record<ItemId, Popup> = {
-  monitor: {
-    title: "Windows 10 桌面亮了",
-    tag: "电脑桌区域 / 单击",
-    body: "屏幕从黑色里醒过来，壁纸是低饱和的极光渐变。桌面上挤着英雄联盟、Steam、4399游戏盒和一个叫“2018暑假作业”的文件夹。",
-    detail: "右下角还跳着一条 QQ 提示：您有 3 条未读消息。",
-    kind: "desktop"
+type StoryNode = {
+  id: NodeId;
+  eyebrow: string;
+  title: string;
+  scene: string;
+  prompt: string[];
+  system?: string;
+  choices: StoryChoice[];
+  closing: string[];
+};
+
+const memories: Memory[] = [
+  {
+    id: "computer",
+    title: "电脑桌面",
+    place: "文件夹：以后",
+    summary: "南京到北京的车票、排班截图、攻略和一张退票订单。",
+    lines: [
+      "钉钉排班截图里，红框圈出“周也 休 周四 周五”。她发来：买了。你别放我鸽子啊。",
+      "北京攻略截图收藏于 2025 年 1 月，备注写着：等她安顿好了，我去找她。",
+      "隐藏文件：2025年11月11日 北京南—南京南.pdf。已退票，退票时间 23:47。",
+      "她在回龙观发烧那天，我买了票。后来看到她朋友圈说退烧了，我把票退了。"
+    ],
+    note: "你们收藏了很多“以后”。后来那些“以后”，你一个人去了南京的颐和路，走了三遍。"
   },
-  lol: {
-    title: "英雄联盟图标",
-    tag: "电脑桌区域 / 双击",
-    body: "2018年5月20日，RNG 在巴黎捧起 MSI 冠军奖杯。那时候很多人都觉得，今年会是 LPL 最有希望的一年。",
-    detail: "到了 11 月 3 日，IG 在仁川夺冠。夏天没等到的答案，秋天给了所有人。",
-    kind: "desktop"
+  {
+    id: "phone",
+    title: "手机",
+    place: "聊天记录",
+    summary: "从“再说吧”到“我不想装了”，异地慢慢把话压短。",
+    lines: [
+      "周也：我们以后怎么办啊 / 主角：再说吧 / 周也：又是“再说”。",
+      "周也：我拿到了 offer！！！ / 主角：太好了 / 周也：你之前不是说考北京吗？",
+      "周也：南京蚊子真多。咬了五个包了。 / 主角：你别坐那儿。",
+      "周也：我哪儿也不想去。就想等你来了看见你。",
+      "周也：要不……我们先分开吧。 / 主角：好。"
+    ],
+    note: "整个通话里，你没有说过一句“我不想分开”。"
   },
-  qq: {
-    title: "QQ 未读消息",
-    tag: "电脑桌区域 / 单击",
-    body: "群聊窗口弹出：今晚世界杯谁看？法国稳了。姆巴佩太快了吧。你看着这些短句，突然想起那种一边看比赛一边刷消息的深夜。",
-    kind: "desktop"
+  {
+    id: "mp3",
+    title: "旧 MP3",
+    place: "她的录音",
+    summary: "分手前寄回来的银色 MP3，里面有两段她忘了删的声音。",
+    lines: [
+      "给你的.mp3：以后你去北京了、我回南京了，翻到这个，还能想起来：2024 年的南京，秋天，有个人挺喜欢你的。",
+      "给自己.mp3：又加班到这个点。想给他打电话。他肯定睡了。",
+      "她说：我今天路过一家店，招牌上写着“南京大牌档”。在门口站了一会儿。没进去。",
+      "她说：北京也好冷。但北京没有梧桐树。算了。不说了。我好累啊。"
+    ],
+    note: "这段录音她存了草稿，没有发给你。她忘了删。"
   },
-  phone: {
-    title: "iPhone X 锁屏",
-    tag: "手机区域 / 单击",
-    body: "锁屏亮起：2018年6月14日 22:34。你向上滑动，微信、微博、抖音、网易云音乐排在第一屏。",
-    detail: "透明手机壳已经发黄，但那一年你觉得它很新。",
-    kind: "phone"
-  },
-  wechat: {
-    title: "朋友圈刷新中",
-    tag: "手机区域 / 单击",
-    body: "朋友圈里有人发：法国队赢了！4:2！！！有人转发锦鲤，有人在说药神看哭了，还有人把毕业照设置成了背景图。",
-    kind: "phone"
-  },
-  netease: {
-    title: "2018 夏天听歌报告",
-    tag: "手机区域 / 单击",
-    body: "歌单里躺着《起风了》《纸短情长》《白羊》《离人愁》。没有真的播放出来，但你已经听见了那个夏天的开头。",
-    detail: "音乐在这个房间里不是背景，是一张可以被点击的记忆地图。",
-    kind: "music"
-  },
-  mp3: {
-    title: "旧 MP3 播放器",
-    tag: "数码区 / 单击",
-    body: "屏幕显示：声景一，青春与告别。进度条缓慢移动，耳机线绕过桌角，像把时间也缠住了。",
-    detail: "这里先用模拟播放器，后续可以接真实音频资源和音量滑块。",
-    kind: "music"
-  },
-  tv: {
-    title: "电视机亮起",
-    tag: "娱乐区 / 单击",
-    body: "电视里默认是世界杯决赛的模拟画面。红蓝色块、滚动字幕、轻微雪花点，让它像一段刚从硬盘里找回来的旧视频。",
-    kind: "tv"
-  },
-  remote: {
-    title: "遥控器换台",
-    tag: "娱乐区 / 单击",
-    body: "频道切走了。世界杯、创造101、镇魂、奥运十周年新闻、我不是药神预告片轮流闪过。不是每段都完整，但每段都像 2018 的一个入口。",
-    kind: "tv"
-  },
-  worldcup: {
-    title: "世界杯赛程海报",
-    tag: "海报墙 / 悬停或单击",
-    body: "手写笔迹写着：决赛 7.15，法国 4:2 克罗地亚。夏天的深夜，因为一场球赛突然有了全世界都醒着的错觉。",
-    kind: "tv"
-  },
-  movie: {
-    title: "《我不是药神》海报",
-    tag: "海报墙 / 单击",
-    body: "2018年7月5日上映，票房 30.7 亿。你不一定记得和谁去看的，但很可能记得走出影院时沉默了一会儿。",
-    kind: "tv"
-  },
-  latiao: {
-    title: "卫龙辣条包装",
-    tag: "零食杂物区 / 可拖拽",
-    body: "2018年，卫龙辣条火到美国。你当年为了买一包，可能真的跑遍了学校小卖部。",
-    detail: "试着把它拖到键盘上。",
-    kind: "egg"
-  },
-  tea: {
-    title: "维他柠檬茶空罐",
-    tag: "零食杂物区 / 单击",
-    body: "易拉罐已经空了，甜味和柠檬味却像还在。2018年的快乐水，常常出现在晚自习、网吧和宿舍桌面上。",
-    kind: "egg"
-  },
-  spinner: {
-    title: "指尖陀螺转起来了",
-    tag: "零食杂物区 / 单击",
-    body: "它在弹窗里旋转，像一个很小的夏天。那一年很多男生口袋里都有一个，说是解压，其实只是想让手里有点事做。",
-    kind: "egg"
-  },
-  examBook: {
-    title: "五年高考三年模拟",
-    tag: "杂物区 / 单击",
-    body: "随机翻到一句作文题：时代与个人。你看着题目，突然发现这些年自己一直在写同一道题。",
-    detail: "2018年6月7日，全国 975 万考生走进考场。",
-    kind: "calendar"
-  },
-  novel: {
-    title: "《全职高手》小说",
-    tag: "杂物区 / 单击",
-    body: "书页停在荣耀开服的段落。2018年，同名动画第二季还在路上，叶修像一直坐在屏幕后面等你回来。",
-    kind: "desktop"
-  },
-  calendar: {
-    title: "2018年6月日历",
-    tag: "时间区 / 单击",
-    body: "红圈标了三个日子：6月7日高考，6月14日世界杯开幕，6月23日创造101决赛。另一个空白日期旁边写着：毕业典礼。",
-    kind: "calendar"
-  },
-  lamp: {
-    title: "台灯开关",
-    tag: "环境区 / 单击",
-    body: "暖黄色灯光铺到桌面上，显示器边框、辣条包装和课本页脚都变得清楚了一点。深夜房间真正开始呼吸。",
-    kind: "egg"
-  },
-  window: {
-    title: "窗外天色变了",
-    tag: "环境区 / 单击",
-    body: "窗外从深蓝慢慢泛出橙色。你在这个房间里待了一整夜，蝉鸣没有停，只是城市快醒了。",
-    kind: "calendar"
-  },
-  fan: {
-    title: "小风扇嗡嗡转",
-    tag: "隐藏区 / 单击",
-    body: "风扇转起来，风铃轻轻晃。2018年的夏天，热得只能靠一台小风扇和一杯冰饮料硬撑。",
-    kind: "egg"
-  },
-  trash: {
-    title: "垃圾桶里的纸条",
-    tag: "隐藏区 / 单击",
-    body: "一张皱巴巴的纸条被翻出来，上面写着：毕业快乐，前程似锦。——2018.6.20",
-    kind: "egg"
+  {
+    id: "recycle",
+    title: "回收站",
+    place: "毕业.mp4",
+    summary: "2025 年毕业典礼，被删除又恢复的视频。",
+    lines: [
+      "周也：你以后想我了，就看看这个视频。毕业快乐。",
+      "周也：还有，你以后别什么都闷在心里了。你想说什么就说。",
+      "主角：我尽量。",
+      "周也：又“尽量”。行吧。但我还是喜欢你。",
+      "最后三秒，画面暗了，她轻声说：要是有你在北京就好了。"
+    ],
+    note: "这个视频你 2025 年看过一次。她走之后你删了。2027 年，你把它恢复了。"
   }
+];
+
+const nodes: StoryNode[] = [
+  {
+    id: "stadium",
+    eyebrow: "节点一 / 2024 年夏天",
+    title: "操场看台",
+    scene: "南京某大学操场看台。夏天晚上，有风。她坐在旁边。",
+    prompt: ["周也：我们以后怎么办？毕业以后，你想去哪？"],
+    system: "2024 年夏天，你当时说的是：“再说吧。”",
+    choices: [
+      {
+        key: "A",
+        text: "我想试试北京，和你一起。但如果没做到，我会提前告诉你，不再让你猜。",
+        response: ["她转过头看你：“真的？”", "你说：“真的。”", "她笑了：“那说好了。我等你来北京。”"]
+      },
+      {
+        key: "B",
+        text: "我想留在南京。但我支持你。",
+        response: ["她沉默了一会儿：“你不跟我一起走？”", "你说：“我可能考不上北京的学校。”", "她声音低了一点：“那我也能回南京找你。南京也挺好的。”"]
+      },
+      {
+        key: "C",
+        text: "我还没想好。但我想和你一起想。",
+        response: ["她看着你：“你愿意和我一起想？”", "你说：“嗯。”", "她笑了：“那行。南京也好北京也好，反正咱俩一块儿就行。”"]
+      },
+      {
+        key: "D",
+        text: "再说吧。",
+        response: ["和当年一样。", "她没再追问。走的时候回头看了你一眼。"]
+      }
+    ],
+    closing: ["她站起来，拍了拍裤子。", "夏天的风从操场那边吹过来。", "她在前面走。", "这一次，我跟上去了。"]
+  },
+  {
+    id: "plane",
+    eyebrow: "节点二 / 2024 年秋天",
+    title: "梧桐路",
+    scene: "南京，种满梧桐的路。她在前面踩落叶，转头看你。",
+    prompt: [
+      "周也：南京的秋天真的绝了。",
+      "周也：你以后要是去别的地方了，会不会想南京？",
+      "周也：你会想梧桐。想食堂的汤包。想……想我吗？"
+    ],
+    choices: [
+      {
+        key: "A",
+        text: "会。想你走在我前面踩落叶的样子。",
+        response: ["她站住，回头看你。风吹过来，梧桐叶落了几片。", "她笑了一下，很短：“你今天怎么这么会说话。”", "她走到你旁边，离得很近：“那你要记住你今天说的。”"]
+      },
+      {
+        key: "B",
+        text: "会。你在我前面走，我希望这条路特别长。",
+        response: ["她站住，回头看你。风吹过来，梧桐叶落了几片。", "她笑了一下，很短：“你今天怎么这么会说话。”", "她走到你旁边，离得很近：“那你要记住你今天说的。”"]
+      },
+      {
+        key: "C",
+        text: "我会想南京。也会想你。分不开的。",
+        response: ["她站住，回头看你。风吹过来，梧桐叶落了几片。", "她笑了一下，很短：“你今天怎么这么会说话。”", "她走到你旁边，离得很近：“那你要记住你今天说的。”"]
+      },
+      {
+        key: "D",
+        text: "嗯。",
+        response: ["和当年一样。", "她等了两秒，转身继续走：“走吧，饿了。”"]
+      }
+    ],
+    closing: ["她走回来的时候，离我很近。", "一片梧桐叶落在她肩膀上。", "这一次，我记住了。"]
+  },
+  {
+    id: "station",
+    eyebrow: "节点三 / 2025 年 6 月",
+    title: "南京南站",
+    scene: "南京南站北广场。广播声循环。她拖着行李箱，回头看你。",
+    prompt: [
+      "周也：我下周排班出来了。不休。组长说这个月都不休。",
+      "周也：我那个车次开始检票了。你有什么要跟我说的吗？"
+    ],
+    system: "她这次问你了。当年她没问。你还有三句话的时间。",
+    choices: [
+      {
+        key: "A",
+        text: "我会去北京看你。以后不能总让你一个人回来。",
+        response: ["她盯着你看：“你这次说的是，以后不能总让我一个人回来。”", "她走过来，隔着安检栏杆拉住你的手。", "“好。我记住了。”"]
+      },
+      {
+        key: "B",
+        text: "到了好好吃饭。别老吃便利店。",
+        response: ["她笑了一下：“你什么时候变啰嗦了。”", "她走了两步回头：“你也别老吃食堂。”"]
+      },
+      {
+        key: "C",
+        text: "南京的秋天我替你看。等你回来。",
+        response: ["她站住了。安静了几秒。", "“南京的秋天。”她低着头，然后抬起来。", "“那你替我看。看了给我发照片。”"]
+      },
+      {
+        key: "D",
+        text: "到了给我发消息。",
+        response: ["和当年一样。", "她说“好”。过安检。回头。", "你什么都没说。她站了十秒，走了。"]
+      },
+      {
+        key: "E",
+        text: "你别走。",
+        response: ["她愣住。广播又响了一次。", "她轻声说：“你早说啊。”", "“车票改不了。但下次回来，你再说一遍。”"]
+      }
+    ],
+    closing: ["画面闪白。广播：G……次列车停止检票。", "她已经走进去了。你站在原地看着。"]
+  }
+];
+
+const echoByPlaneChoice: Record<ChoiceKey, string> = {
+  A: "你那时候说，会想我走在前面踩落叶的样子。我后来偶尔会想起这句话。",
+  B: "你那时候说，希望那条路特别长。其实我那天也希望。",
+  C: "你那时候说，南京和我分不开。后来我去了北京，才有点明白这句话。",
+  D: "你那时候还是只说了一个“嗯”。你以前真的很不爱说话。",
+  E: "南京的梧桐，我后来也还是会想起。"
 };
 
-const channels = ["世界杯决赛", "创造101", "镇魂", "奥运十周年", "药神预告"];
+const finalChoices = [
+  "再见。",
+  "保重。",
+  "挺好的。",
+  "我会记得南京的秋天。",
+  "那时候没说完的话，现在说也晚了。但我确实很爱过你。"
+];
 
-type MusicHandle = {
-  audio?: HTMLAudioElement;
-  context?: AudioContext;
-  timers: ReturnType<typeof setInterval>[];
-  nodes: AudioScheduledSourceNode[];
-};
+function cx(...classes: Array<string | false | undefined>) {
+  return classes.filter(Boolean).join(" ");
+}
 
 function PhoneTop({ title, onBack }: { title: string; onBack: () => void }) {
   return (
@@ -190,620 +230,727 @@ function PhoneTop({ title, onBack }: { title: string; onBack: () => void }) {
   );
 }
 
-export default function Home() {
-  const [popup, setPopup] = useState<Popup | null>(null);
-  const [phoneApp, setPhoneApp] = useState<PhoneApp>("home");
-  const [visited, setVisited] = useState<ItemId[]>([]);
-  const [channel, setChannel] = useState(0);
-  const [lampOn, setLampOn] = useState(true);
-  const [daybreak, setDaybreak] = useState(false);
-  const [fanOn, setFanOn] = useState(false);
-  const [lampClicks, setLampClicks] = useState(0);
-  const [windowClicks, setWindowClicks] = useState(0);
-  const [eggs, setEggs] = useState<string[]>([]);
-  const [dragging, setDragging] = useState<ItemId | null>(null);
-  const [musicOn, setMusicOn] = useState(false);
-  const [musicBlocked, setMusicBlocked] = useState(false);
-  const musicRef = useRef<MusicHandle | null>(null);
+function DesktopMemory({ memory, markSeen }: { memory: Memory; markSeen: () => void }) {
+  const [activeApp, setActiveApp] = useState<DesktopApp>("folder");
 
-  const progress = Math.round((visited.length / Object.keys(items).length) * 100);
-
-  const roomClass = useMemo(() => {
-    return ["room", lampOn ? "lampOn" : "lampOff", daybreak ? "daybreak" : "night", fanOn ? "fanOn" : ""].join(" ");
-  }, [lampOn, daybreak, fanOn]);
-
-  function openItem(id: ItemId) {
-    if (id === "phone" || id === "wechat" || id === "netease") {
-      setVisited((current) => (current.includes(id) ? current : [...current, id]));
-      setPhoneApp(id === "wechat" ? "wechat" : id === "netease" ? "netease" : "home");
-      setPopup(items.phone);
-      return;
-    }
-
-    if (id === "remote") {
-      setChannel((current) => (current + 1) % channels.length);
-    }
-    if (id === "lamp") {
-      const next = lampClicks + 1;
-      setLampClicks(next);
-      setLampOn((current) => !current);
-      if (next >= 5) triggerEgg("台灯闪了三下：2018年的深夜，你也是这样熬夜的。");
-    }
-    if (id === "window") {
-      const next = windowClicks + 1;
-      setWindowClicks(next);
-      setDaybreak((current) => !current);
-      if (next >= 3) triggerEgg("窗外忽然放起烟花：2018年夏天，你也在某个夜晚看过烟花吗？");
-    }
-    if (id === "fan") setFanOn((current) => !current);
-
-    setVisited((current) => (current.includes(id) ? current : [...current, id]));
-    setPopup(items[id]);
+  function openApp(app: DesktopApp) {
+    setActiveApp(app);
+    markSeen();
   }
-
-  function triggerEgg(message: string) {
-    setEggs((current) => (current.includes(message) ? current : [...current, message]));
-    setPopup({ title: "隐藏彩蛋", tag: "特殊触发", body: message, kind: "egg" });
-  }
-
-  function handleDrop(target: "keyboard" | "tvDock" | "mp3Dock") {
-    if (dragging === "latiao" && target === "keyboard") {
-      triggerEgg("2018年，你一边吃辣条一边打 LOL，油都蹭到键盘上了。");
-    } else if (dragging === "phone" && target === "tvDock") {
-      triggerEgg("2018年的夏天，你一边看世界杯一边刷微博，手机比电视还忙。");
-    } else if (dragging === "phone" && target === "mp3Dock") {
-      triggerEgg("2018年，你用手机听歌，用 MP3 显得很复古。两种时代感在桌面上碰了一下。");
-    }
-    setDragging(null);
-  }
-
-  function scheduleTone(
-    context: AudioContext,
-    destination: AudioNode,
-    frequency: number,
-    start: number,
-    duration: number,
-    type: OscillatorType,
-    volume: number,
-    attack = 0.018,
-    release = 0.18,
-    pan = 0
-  ) {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    const panner = context.createStereoPanner();
-
-    oscillator.type = type;
-    oscillator.frequency.setValueAtTime(frequency, start);
-    panner.pan.setValueAtTime(pan, start);
-    gain.gain.setValueAtTime(0.001, start);
-    gain.gain.linearRampToValueAtTime(volume, start + attack);
-    gain.gain.setValueAtTime(volume * 0.72, start + Math.max(attack, duration - release));
-    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-
-    oscillator.connect(gain);
-    gain.connect(panner);
-    panner.connect(destination);
-    oscillator.start(start);
-    oscillator.stop(start + duration + 0.05);
-  }
-
-  function scheduleKick(context: AudioContext, destination: AudioNode, start: number) {
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(96, start);
-    oscillator.frequency.exponentialRampToValueAtTime(42, start + 0.18);
-    gain.gain.setValueAtTime(0.09, start);
-    gain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
-
-    oscillator.connect(gain);
-    gain.connect(destination);
-    oscillator.start(start);
-    oscillator.stop(start + 0.24);
-  }
-
-  function scheduleNoiseHit(context: AudioContext, destination: AudioNode, buffer: AudioBuffer, start: number, duration: number, volume: number, filterFrequency: number, pan = 0) {
-    const source = context.createBufferSource();
-    const gain = context.createGain();
-    const filter = context.createBiquadFilter();
-    const panner = context.createStereoPanner();
-
-    source.buffer = buffer;
-    filter.type = "highpass";
-    filter.frequency.setValueAtTime(filterFrequency, start);
-    panner.pan.setValueAtTime(pan, start);
-    gain.gain.setValueAtTime(0.001, start);
-    gain.gain.linearRampToValueAtTime(volume, start + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(panner);
-    panner.connect(destination);
-    source.start(start);
-    source.stop(start + duration + 0.02);
-  }
-
-  function stopMusic() {
-    if (!musicRef.current) return;
-
-    musicRef.current.timers.forEach((timer) => clearInterval(timer));
-    musicRef.current.nodes.forEach((node) => {
-      try {
-        node.stop();
-      } catch {
-        // The browser may have already stopped a scheduled source.
-      }
-    });
-    if (musicRef.current.audio) {
-      musicRef.current.audio.pause();
-      musicRef.current.audio.currentTime = 0;
-    }
-    if (musicRef.current.context) {
-      void musicRef.current.context.close();
-    }
-    musicRef.current = null;
-    setMusicOn(false);
-    setMusicBlocked(false);
-  }
-
-  function startSoundscape() {
-    const AudioContextClass = window.AudioContext || (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-
-    const context = new AudioContextClass();
-    const master = context.createGain();
-    const compressor = context.createDynamicsCompressor();
-    const musicBus = context.createGain();
-    const delay = context.createDelay();
-    const delayFeedback = context.createGain();
-    const delayWet = context.createGain();
-    const roomFilter = context.createBiquadFilter();
-    const nodes: AudioScheduledSourceNode[] = [];
-    const timers: ReturnType<typeof setInterval>[] = [];
-
-    master.gain.value = 0.34;
-    musicBus.gain.value = 0.92;
-    delay.delayTime.value = 0.32;
-    delayFeedback.gain.value = 0.28;
-    delayWet.gain.value = 0.18;
-    compressor.threshold.value = -24;
-    compressor.knee.value = 18;
-    compressor.ratio.value = 3;
-    compressor.attack.value = 0.02;
-    compressor.release.value = 0.28;
-    roomFilter.type = "lowpass";
-    roomFilter.frequency.value = 6200;
-
-    musicBus.connect(roomFilter);
-    musicBus.connect(delay);
-    delay.connect(delayFeedback);
-    delayFeedback.connect(delay);
-    delay.connect(delayWet);
-    delayWet.connect(roomFilter);
-    roomFilter.connect(compressor);
-    compressor.connect(master);
-    master.connect(context.destination);
-
-    const noiseBuffer = context.createBuffer(1, context.sampleRate * 2, context.sampleRate);
-    const noiseData = noiseBuffer.getChannelData(0);
-    for (let index = 0; index < noiseData.length; index += 1) {
-      noiseData[index] = (Math.random() * 2 - 1) * 0.16;
-    }
-
-    const roomNoise = context.createBufferSource();
-    const noiseGain = context.createGain();
-    roomNoise.buffer = noiseBuffer;
-    roomNoise.loop = true;
-    noiseGain.gain.value = 0.028;
-    roomNoise.connect(noiseGain);
-    noiseGain.connect(roomFilter);
-    roomNoise.start();
-    nodes.push(roomNoise);
-
-    const fanHum = context.createOscillator();
-    const fanGain = context.createGain();
-    fanHum.type = "sine";
-    fanHum.frequency.value = 72;
-    fanGain.gain.value = 0.018;
-    fanHum.connect(fanGain);
-    fanGain.connect(roomFilter);
-    fanHum.start();
-    nodes.push(fanHum);
-
-    const bpm = 88;
-    const stepTime = 60 / bpm / 4;
-    const lead = [392, 0, 440, 523.25, 659.25, 0, 587.33, 523.25, 440, 0, 392, 349.23, 329.63, 0, 392, 440, 523.25, 0, 493.88, 440, 392, 0, 329.63, 392, 440, 0, 392, 349.23, 329.63, 0, 293.66, 329.63];
-    const chords = [
-      { bass: 110, notes: [220, 261.63, 329.63, 440] },
-      { bass: 87.31, notes: [174.61, 220, 261.63, 349.23] },
-      { bass: 130.81, notes: [196, 261.63, 329.63, 392] },
-      { bass: 98, notes: [196, 246.94, 293.66, 392] }
-    ];
-    const arpPattern = [0, 2, 1, 3, 2, 1, 0, 2];
-    let nextStep = 0;
-    let nextTime = context.currentTime + 0.08;
-
-    function scheduleStep(step: number, start: number) {
-      const barStep = step % 64;
-      const chord = chords[Math.floor(barStep / 16) % chords.length];
-      const stepInBar = barStep % 16;
-
-      if (stepInBar === 0 || stepInBar === 8) {
-        const lift = stepInBar === 8 ? 1.5 : 1;
-        scheduleTone(context, musicBus, chord.bass * lift, start, stepTime * 2.2, "sine", 0.062, 0.018, 0.28, -0.08);
-        scheduleKick(context, musicBus, start);
-      }
-
-      if (stepInBar === 4 || stepInBar === 12) {
-        scheduleNoiseHit(context, musicBus, noiseBuffer, start, 0.16, 0.035, 900, 0.08);
-      }
-
-      if (stepInBar % 2 === 0) {
-        scheduleNoiseHit(context, musicBus, noiseBuffer, start + 0.01, 0.045, 0.012, 5200, stepInBar % 4 === 0 ? -0.18 : 0.18);
-      }
-
-      if (stepInBar === 0) {
-        chord.notes.forEach((frequency, index) => {
-          scheduleTone(context, musicBus, frequency, start + index * 0.035, stepTime * 14, "sine", 0.018, 0.24, 1.1, -0.26 + index * 0.16);
-        });
-      }
-
-      if (stepInBar % 2 === 0) {
-        const arpFrequency = chord.notes[arpPattern[(barStep / 2) % arpPattern.length]];
-        scheduleTone(context, musicBus, arpFrequency * 2, start + 0.018, stepTime * 1.2, "triangle", 0.024, 0.012, 0.18, stepInBar % 4 === 0 ? -0.32 : 0.32);
-      }
-
-      const leadFrequency = lead[barStep % lead.length];
-      if (leadFrequency) {
-        const phraseVolume = barStep < 32 ? 0.052 : 0.042;
-        scheduleTone(context, musicBus, leadFrequency, start + 0.02, stepTime * 1.85, "triangle", phraseVolume, 0.024, 0.26, 0.06);
-        if (barStep % 8 === 6) {
-          scheduleTone(context, musicBus, leadFrequency * 1.5, start + stepTime * 0.55, stepTime * 1.3, "sine", 0.015, 0.018, 0.24, 0.36);
-        }
-      }
-
-      if (barStep % 24 === 10 || barStep % 31 === 18) {
-        const frequency = 2500 + Math.random() * 900;
-        scheduleTone(context, musicBus, frequency, start, 0.08, "sine", 0.008, 0.004, 0.06, 0.46);
-      }
-    }
-
-    timers.push(setInterval(() => {
-      while (nextTime < context.currentTime + 0.42) {
-        scheduleStep(nextStep, nextTime);
-        nextStep += 1;
-        nextTime += stepTime;
-      }
-    }, 90));
-
-    musicRef.current = { context, timers, nodes };
-    setMusicOn(true);
-    setMusicBlocked(context.state === "suspended");
-    void context.resume().then(() => setMusicBlocked(false)).catch(() => setMusicBlocked(true));
-  }
-
-  function toggleMusic() {
-    if (musicRef.current) {
-      stopMusic();
-      return;
-    }
-
-    startSoundscape();
-  }
-
-  useEffect(() => {
-    const startTimer = window.setTimeout(() => {
-      if (!musicRef.current) startSoundscape();
-    }, 600);
-
-    function unlockMusic() {
-      const handle = musicRef.current;
-      if (handle?.context?.state === "suspended") {
-        void handle.context.resume().then(() => setMusicBlocked(false)).catch(() => setMusicBlocked(true));
-      } else if (!handle) {
-        startSoundscape();
-      }
-    }
-
-    window.addEventListener("pointerdown", unlockMusic, { once: true });
-    window.addEventListener("keydown", unlockMusic, { once: true });
-
-    return () => {
-      window.clearTimeout(startTimer);
-      window.removeEventListener("pointerdown", unlockMusic);
-      window.removeEventListener("keydown", unlockMusic);
-      stopMusic();
-    };
-  }, []);
 
   return (
-    <main className="appShell">
-      <header className="topHud">
+    <div className="desktopOS">
+      <div className="desktopWallpaper">
+        <div className="desktopBrand"><span>Windows</span><small>2027 · 南京宿舍</small></div>
+        <div className="desktopApps">
+          <button onClick={() => openApp("folder")} type="button"><i className="pixelAppIcon folderPixel">文</i><span>以后</span></button>
+          <button onClick={() => openApp("tickets")} type="button"><i className="pixelAppIcon ticketPixel">G</i><span>高铁票根</span></button>
+          <button onClick={() => openApp("recycle")} type="button"><i className="pixelAppIcon recyclePixel">♻</i><span>回收站</span></button>
+          <button onClick={() => openApp("notes")} type="button"><i className="pixelAppIcon notePixel">记</i><span>备忘录</span></button>
+        </div>
+
+        <section className={`desktopWindow desktopWindow-${activeApp}`}>
+          <header className="desktopWindowBar">
+            <span>{activeApp === "folder" ? "以后" : activeApp === "tickets" ? "高铁票根" : activeApp === "recycle" ? "回收站" : "备忘录"}</span>
+            <div><button type="button">—</button><button type="button">×</button></div>
+          </header>
+
+          {activeApp === "folder" && (
+            <div className="fileExplorer">
+              <aside>
+                <b>快速访问</b>
+                <span>桌面</span>
+                <span>图片</span>
+                <span>文档</span>
+                <span>回收站</span>
+              </aside>
+              <main>
+                <button onClick={() => openApp("tickets")} type="button"><i>🖼</i><b>她的排班.jpg</b><small>周也 休 周四 周五 · 勿改</small></button>
+                <button type="button"><i>🚄</i><b>南京南→北京南 G6</b><small>¥558.5 · 收藏时间 2024 年 12 月</small></button>
+                <button type="button"><i>🚄</i><b>北京南→南京南 G23</b><small>¥558.5 · 收藏时间 2024 年 12 月</small></button>
+                <button onClick={() => openApp("notes")} type="button"><i>🗺</i><b>北京攻略截图</b><small>等她安顿好了，我去找她。</small></button>
+                <button type="button"><i>💬</i><b>2025年3月聊天记录</b><small>她拿到 offer，他说“恭喜”。</small></button>
+              </main>
+            </div>
+          )}
+
+          {activeApp === "tickets" && (
+            <div className="ticketWall">
+              <article><b>南京南 → 北京南</b><span>G6 · ¥558.5</span><small>收藏了，却没说出口。</small></article>
+              <article><b>北京南 → 南京南</b><span>G23 · ¥558.5</span><small>她来了一次，他去了四次。</small></article>
+              <article className="danger"><b>已退票订单</b><span>2025-11-11 23:47</span><small>她在输液室给我发“多喝热水”的时候，我在退票。</small></article>
+            </div>
+          )}
+
+          {activeApp === "recycle" && (
+            <div className="recycleWindow">
+              <i>♻</i>
+              <b>毕业.mp4</b>
+              <span>这个视频你 2025 年看过一次。她走之后你删了。</span>
+              <p>最后三秒，画面暗了，她轻声说：要是有你在北京就好了。</p>
+            </div>
+          )}
+
+          {activeApp === "notes" && (
+            <div className="desktopNotes">
+              <p>{memory.note}</p>
+              <p>你以为爱是等准备好了再给她。但爱不是。爱是哪怕没准备好，也要让她知道你在。</p>
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function PhoneMemory({ markSeen }: { markSeen: () => void }) {
+  const [phoneApp, setPhoneApp] = useState<PhoneApp>("home");
+
+  function openPhoneApp(app: PhoneApp) {
+    setPhoneApp(app);
+    markSeen();
+  }
+
+  return (
+    <div className="phoneOS">
+      <div className="phoneFrame">
+        <div className="phoneStatus"><span>23:47</span><span>5G 62%</span></div>
+        <div className="phoneScreen">
+          {phoneApp === "home" && (
+            <div className="phoneHome">
+              <div className="phoneDate">
+                <strong>6月</strong>
+                <span>2027年 星期三 · 南京</span>
+              </div>
+              <div className="appGrid">
+                <button onClick={() => openPhoneApp("wechat")} type="button"><img className="appIcon" src="/assets/phone-apps/wechat.png" alt="" draggable={false} />微信</button>
+                <button onClick={() => openPhoneApp("album")} type="button"><img className="appIcon" src="/assets/phone-apps/album.png" alt="" draggable={false} />相册</button>
+                <button onClick={() => openPhoneApp("moments")} type="button"><img className="appIcon" src="/assets/phone-apps/weibo.png" alt="" draggable={false} />朋友圈</button>
+                <button onClick={() => openPhoneApp("calendar")} type="button"><img className="appIcon" src="/assets/phone-apps/calendar.png" alt="" draggable={false} />日历</button>
+              </div>
+            </div>
+          )}
+
+          {phoneApp === "wechat" && (
+            <div className="phoneAppView">
+              <PhoneTop title="微信" onBack={() => setPhoneApp("home")} />
+              <div className="chatList">
+                <button onClick={() => openPhoneApp("zhouye")} className="pinnedChat" type="button"><i>周</i><b>周也</b><span>我今天不想装了。你别打过来。</span><em>2025/12</em></button>
+                <button type="button"><i>满</i><b>林小满</b><span>她最近在北京升职了。你俩还有联系吗？</span><em>刚刚</em></button>
+                <button type="button"><i>班</i><b>本科班群</b><span>毕业快乐，以后也要好好的。</span><em>2025/6</em></button>
+              </div>
+            </div>
+          )}
+
+          {phoneApp === "zhouye" && (
+            <div className="phoneAppView phoneConversation">
+              <PhoneTop title="周也" onBack={() => setPhoneApp("wechat")} />
+              <div className="mobileMessages">
+                <time>2024 年夏天</time>
+                <p className="theirs">[图片：南京晚霞] 南京的晚霞有梧桐树衬着。北京的可能有高楼大厦吧。</p>
+                <p className="theirs">我们以后怎么办啊</p>
+                <p className="mine">再说吧</p>
+                <p className="theirs">又是“再说”</p>
+                <time>2025 年 8 月</time>
+                <p className="theirs">我到了。花坛这儿。</p>
+                <p className="mine">还在开会</p>
+                <p className="theirs">我哪儿也不想去。就想等你来了看见你</p>
+                <time>2026 年 1 月</time>
+                <p className="theirs">要不……我们先分开吧。</p>
+                <p className="mine">好。</p>
+              </div>
+            </div>
+          )}
+
+          {phoneApp === "album" && (
+            <div className="phoneAppView">
+              <PhoneTop title="相册" onBack={() => setPhoneApp("home")} />
+              <div className="photoGrid">
+                <button type="button">梧桐大道</button>
+                <button type="button">毕业照</button>
+                <button type="button">南京南站</button>
+                <button type="button">花坛</button>
+                <button type="button">汤包</button>
+                <button type="button">旧 MP3</button>
+              </div>
+            </div>
+          )}
+
+          {phoneApp === "moments" && (
+            <div className="phoneAppView">
+              <PhoneTop title="朋友圈" onBack={() => setPhoneApp("home")} />
+              <div className="feedList">
+                <article><b>我</b><p>收拾东西翻到的。2024 年秋天，南京。那时候真好。</p></article>
+                <article><b>林小满</b><p>2024 年……好怀念啊。她最近在北京升职了。</p></article>
+                <article><b>系统通知</b><p>周也 赞了你的朋友圈。</p></article>
+              </div>
+            </div>
+          )}
+
+          {phoneApp === "calendar" && (
+            <div className="phoneAppView">
+              <PhoneTop title="日历" onBack={() => setPhoneApp("home")} />
+              <div className="phoneCalendar">
+                <b>2024.06 在一起</b>
+                <b>2025.06 毕业</b>
+                <b>2025.08 她回南京</b>
+                <b>2026.01 分手</b>
+                <b>2027.06 离开南京</b>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <aside className="phoneMemoryText">
+        <p className="eyebrow">手机 / 聊天记录</p>
+        <h2>她等你开口的那些地方，都还亮着。</h2>
+        <p>这里保留原来的手机系统交互：桌面、微信、相册、朋友圈和日历。内容已经全部换成《离别》的南京线索。</p>
+      </aside>
+    </div>
+  );
+}
+
+function getTransitionText(nodeId: NodeId) {
+  if (nodeId === "stadium") return "后来我们走过了很多个秋天。";
+  if (nodeId === "plane") return "南京的秋天还没结束，夏天先走了。";
+  return "你站在原地。很久。";
+}
+
+function getSceneHint(nodeId: NodeId, activeChoice: StoryChoice | null) {
+  if (nodeId === "stadium") {
+    if (!activeChoice) return "远处跑步的脚步声每隔几秒响一次。她没有看你，只看着操场。";
+    if (activeChoice.key === "D") return "她站起来，拍了拍裤子上的灰，没有回头。";
+    return "路灯在她眼睛里有一个很小的光点。她把小拇指伸到你们之间。";
+  }
+
+  if (nodeId === "plane") {
+    if (!activeChoice) return "她问“想我吗”的时候，风刚好停了。梧桐叶落在地上，没再动。";
+    if (activeChoice.key === "D") return "风又响起来。她还是走在前面，距离仍然是三步。";
+    return "她走回你身边。没有牵手，但离得很近。";
+  }
+
+  if (!activeChoice) return "广播：G……次列车现在开始检票。她没看检票口，她看着你。";
+  if (activeChoice.key === "A") return "广播：G……次列车开始检票。她重复那句话，像在确认什么。";
+  if (activeChoice.key === "E") return "广播：G……次列车停止检票。声音近得像就在耳边。";
+  return "广播：G……次列车即将停止检票。玻璃幕墙上人影来来往往。";
+}
+
+function SceneVisual({ node, activeChoice }: { node: StoryNode; activeChoice: StoryChoice | null }) {
+  const choiceClass = activeChoice ? `choice-${activeChoice.key.toLowerCase()}` : "choice-waiting";
+
+  return (
+    <div className={cx("sceneVisual", `scene-${node.id}`, choiceClass)}>
+      <div className="sceneSky" />
+      <div className="sceneBackdrop" />
+      <div className="sceneCharacter protagonist" />
+      <div className="sceneCharacter zhouye" />
+
+      {node.id === "stadium" && (
+        <>
+          <div className="trackLines"><i /><i /><i /></div>
+          <div className="bleachers"><i /><i /><i /><i /></div>
+          <div className="waterBottle" />
+          <div className="phoneBlink" />
+          <div className="lampGlow" />
+        </>
+      )}
+
+      {node.id === "plane" && (
+        <>
+          <div className="treeCanopy"><i /><i /><i /><i /><i /></div>
+          <div className="leafRoad"><i /><i /><i /><i /><i /><i /></div>
+          <div className="bike" />
+          <div className="windLine one" />
+          <div className="windLine two" />
+          <div className="focusFrame" />
+        </>
+      )}
+
+      {node.id === "station" && (
+        <>
+          <div className="stationGlass"><i /><i /><i /><i /></div>
+          <div className="stationSign">南京南站</div>
+          <div className="ticketStub" />
+          <div className="suitcase" />
+          <div className="securityRail" />
+          <div className="broadcastTicker">{activeChoice?.key === "E" ? "G……次列车停止检票" : activeChoice?.key === "A" ? "G……次列车开始检票" : "G……次列车即将停止检票"}</div>
+        </>
+      )}
+
+      <div className="sceneCaption">
+        <b>{node.title}</b>
+        <span>{getSceneHint(node.id, activeChoice)}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function Home() {
+  const [phase, setPhase] = useState<Phase>("intro");
+  const [introPhotoOpen, setIntroPhotoOpen] = useState(false);
+  const [introPhotoLineIndex, setIntroPhotoLineIndex] = useState(0);
+  const [packedIntroItems, setPackedIntroItems] = useState<IntroPackItem[]>([]);
+  const [openedMemory, setOpenedMemory] = useState<Memory | null>(null);
+  const [seenMemories, setSeenMemories] = useState<MemoryId[]>([]);
+  const [nodeIndex, setNodeIndex] = useState(0);
+  const [nodeChoices, setNodeChoices] = useState<Partial<Record<NodeId, ChoiceKey>>>({});
+  const [activeChoice, setActiveChoice] = useState<StoryChoice | null>(null);
+  const [farewellChoice, setFarewellChoice] = useState<string | null>(null);
+
+  const progress = Math.round((seenMemories.length / memories.length) * 100);
+  const currentNode = nodes[nodeIndex];
+  const planeChoice = nodeChoices.plane ?? "D";
+  const canSecondAsk = seenMemories.length === memories.length;
+  const introPackItems: IntroPackItem[] = ["laptop", "books", "folder", "calendar", "lamp", "keyboard", "mp3", "phone", "mouse", "cup", "scarf"];
+  const introPackedCount = packedIntroItems.length;
+  const introPackedDone = introPackedCount === introPackItems.length;
+  const introPhotoLines = [
+    "2027年6月。研究生毕业。",
+    "我在这间宿舍住了两年。现在要搬走了。",
+    "收拾东西的时候，翻到这张照片——2024年夏天。",
+    "南京的夏天很热，她的头发黏在脸上，但笑得很好看。",
+    "我坐在电脑前面，看了很久。",
+    "然后屏幕花了。"
+  ];
+  const introPackLine = introPackedDone
+    ? "东西都收进去了。桌上只剩下那张照片。"
+    : `旧书、文件夹和零碎的小东西还散在房间里。先把它们收进箱子。还剩 ${introPackItems.length - introPackedCount} 件。`;
+
+  const roomHint = useMemo(() => {
+    if (!canSecondAsk) return `请查看四个记忆碎片：${seenMemories.length} / ${memories.length}`;
+    return "记忆校准完成。系统正在等待你的第二次选择。";
+  }, [canSecondAsk, seenMemories.length]);
+
+  function openMemory(memory: Memory) {
+    setOpenedMemory(memory);
+    setSeenMemories((current) => (current.includes(memory.id) ? current : [...current, memory.id]));
+  }
+
+  function markMemorySeen(id: MemoryId) {
+    setSeenMemories((current) => (current.includes(id) ? current : [...current, id]));
+  }
+
+  function chooseNode(choice: StoryChoice) {
+    setActiveChoice(choice);
+    setNodeChoices((current) => ({ ...current, [currentNode.id]: choice.key }));
+  }
+
+  function continueNode() {
+    setActiveChoice(null);
+    if (nodeIndex < nodes.length - 1) {
+      setNodeIndex((index) => index + 1);
+      return;
+    }
+    setPhase("system");
+  }
+
+  function packIntroItem(item: IntroPackItem) {
+    setPackedIntroItems((current) => (current.includes(item) ? current : [...current, item]));
+  }
+
+  function openIntroPhoto() {
+    setIntroPhotoLineIndex(0);
+    setIntroPhotoOpen(true);
+  }
+
+  function advanceIntroPhotoLine() {
+    setIntroPhotoLineIndex((index) => Math.min(index + 1, introPhotoLines.length - 1));
+  }
+
+  function resetStory() {
+    setPhase("intro");
+    setIntroPhotoOpen(false);
+    setIntroPhotoLineIndex(0);
+    setPackedIntroItems([]);
+    setOpenedMemory(null);
+    setSeenMemories([]);
+    setNodeIndex(0);
+    setNodeChoices({});
+    setActiveChoice(null);
+    setFarewellChoice(null);
+  }
+
+  return (
+    <main className="app">
+      <section className="hero">
         <div>
-          <p className="kicker">一间 2018 年的深夜房间</p>
-          <h1>回到2018</h1>
+          <p className="eyebrow">南京版互动叙事原型</p>
+          <h1>离别</h1>
+          <p>如果结局注定是分开，你还愿不愿意认真过在一起的每一分每一秒？</p>
         </div>
-        <aside className="statusPanel">
-          <span>已发现 {visited.length} / {Object.keys(items).length}</span>
-          <div className="meter"><i style={{ width: `${progress}%` }} /></div>
-          <small>彩蛋 {eggs.length} / 3 · 当前频道：{channels[channel]}</small>
-          <button className={`musicToggle ${musicOn ? "active" : ""}`} onClick={toggleMusic} type="button">
-            {musicOn ? (musicBlocked ? "点击解锁原创夏夜曲" : "暂停原创夏夜曲") : "播放原创夏夜曲"}
-          </button>
-        </aside>
-      </header>
-
-      <section className={roomClass} aria-label="2018 深夜房间互动场景">
-        <div className="wallGlow" aria-hidden="true" />
-        <div className="roomDepth" aria-hidden="true" />
-        <div className="bookcase" aria-hidden="true">
-          <span className="shelf shelfTop" />
-          <span className="shelf shelfMid" />
-          <span className="shelf shelfLow" />
+        <div className="status">
+          <span>{phase === "room" ? roomHint : "2027 年 6 月，南京某高校研究生宿舍"}</span>
+          <i><b style={{ width: `${progress}%` }} /></i>
         </div>
-        <div className="pinboard" aria-hidden="true" />
-        <button className="poster posterWorldcup item hasSprite" onClick={() => openItem("worldcup")} aria-label="世界杯赛程海报">
-          <img className="itemSprite" src="/assets/items/worldcup.png" alt="" draggable={false} />
-        </button>
-        <button className="poster posterMovie item hasSprite" onClick={() => openItem("movie")} aria-label="我不是药神海报">
-          <img className="itemSprite" src="/assets/items/movie.png" alt="" draggable={false} />
-        </button>
-        <button className="poster poster101 item hasSprite" onClick={() => setPopup({ title: "创造101海报", tag: "娱乐区 / 单击", body: "6月23日，火箭少女101成团。卡路里从夏天火到冬天。", kind: "tv" })} aria-label="创造101海报">
-          <img className="itemSprite" src="/assets/items/poster101.png" alt="" draggable={false} />
-        </button>
-        <button className="poster posterGuardian item hasSprite" onClick={() => setPopup({ title: "镇魂海报", tag: "娱乐区 / 单击", body: "2018年6月13日开播。镇魂女孩的夏天，沈巍和赵云澜站在屏幕里。", kind: "tv" })} aria-label="镇魂海报">
-          <img className="itemSprite" src="/assets/items/posterGuardian.png" alt="" draggable={false} />
-        </button>
-
-        <button className="window item hasSprite" onClick={() => openItem("window")} aria-label="窗外天色">
-          <img className="itemSprite" src={daybreak ? "/assets/items/window-day.png" : "/assets/items/window-night.png"} alt="" draggable={false} />
-        </button>
-        <button className="clock item hasSprite" onClick={() => setPopup({ title: "墙上的时钟", tag: "环境区 / 悬停", body: "2018年的时间，走得比你想的要快。", kind: "calendar" })} aria-label="墙上的时钟">
-          <img className="itemSprite" src="/assets/items/clock.png" alt="" draggable={false} />
-        </button>
-
-        <div className="tvCabinet">
-        <button className="tv item hasSprite" onClick={() => openItem("tv")} aria-label="电视机">
-            <img className="itemSprite" src="/assets/items/tv.png" alt="" draggable={false} />
-            <span>{channels[channel]}</span>
-          </button>
-          <button className="remote item hasSprite" onClick={() => openItem("remote")} aria-label="遥控器">
-            <img className="itemSprite" src="/assets/items/remote.png" alt="" draggable={false} />
-          </button>
-          <button className="drawer item hasSprite" onClick={() => setPopup({ title: "电视柜抽屉", tag: "娱乐区 / 单击", body: "抽屉里有一叠老照片：聚会、吃西瓜、毕业照。每张都糊，但每张都很真。", kind: "egg" })} aria-label="电视柜抽屉">
-            <img className="itemSprite" src="/assets/items/drawer.png" alt="" draggable={false} />
-          </button>
-        </div>
-
-        <div className="desk">
-          <button className="monitor item hasSprite" onClick={() => openItem("monitor")} aria-label="电脑显示器">
-            <img className="itemSprite" src="/assets/items/monitor.png" alt="" draggable={false} />
-            <span className="desktopIcon lolIcon" onDoubleClick={(event) => { event.stopPropagation(); openItem("lol"); }}>LOL</span>
-            <span className="desktopIcon qqIcon" onClick={(event) => { event.stopPropagation(); openItem("qq"); }}>QQ</span>
-            <span className="desktopIcon gameIcon" onClick={(event) => { event.stopPropagation(); setPopup({ title: "4399 游戏盒", tag: "电脑桌区域 / 单击", body: "仿 Flash 小游戏页面打开了：摩尔庄园、赛尔号、洛克王国。你的拉姆还在等你吗？", kind: "desktop" }); }}>4399</span>
-          </button>
-
-          <button
-            className="keyboard item dropTarget hasSprite"
-            onClick={() => setPopup({ title: "键盘亮起", tag: "电脑桌区域 / 悬停", body: "2018年夏天，你在这块键盘上敲过多少篇论文，又敲过多少句“作业借我抄抄”？", kind: "desktop" })}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={() => handleDrop("keyboard")}
-            aria-label="键盘"
-          >
-            <img className="itemSprite" src="/assets/items/keyboard.png" alt="" draggable={false} />
-          </button>
-          <button className="mouse item hasSprite" onClick={() => setPopup({ title: "有线鼠标", tag: "电脑桌区域 / 单击", body: "那年你还没用上无线鼠标，有线的一直缠着充电线。", kind: "desktop" })} aria-label="有线鼠标">
-            <img className="itemSprite" src="/assets/items/mouse.png" alt="" draggable={false} />
-          </button>
-          <button className="cable item hasSprite" onClick={() => setPopup({ title: "Micro-USB 充电线", tag: "电脑桌区域 / 单击", body: "2018年，出门总要带三根线。借充电线，是一种社交。", kind: "desktop" })} aria-label="Micro-USB 充电线">
-            <img className="itemSprite" src="/assets/items/cable.png" alt="" draggable={false} />
-          </button>
-
-          <button
-            className="phone item hasSprite deskFan"
-            onClick={() => openItem("fan")}
-            aria-label="小风扇"
-          >
-            <img className="itemSprite" src="/assets/items/fan.png" alt="" draggable={false} />
-          </button>
-
-          <button
-            className="phone item hasSprite tablePhone"
-            draggable
-            onDragStart={() => setDragging("phone")}
-            onClick={() => openItem("phone")}
-            aria-label="iPhone X"
-          >
-            <img className="itemSprite" src="/assets/items/phone.png" alt="" draggable={false} />
-            <i aria-label="微信" onClick={(event) => { event.stopPropagation(); openItem("wechat"); }} />
-            <i aria-label="网易云" onClick={(event) => { event.stopPropagation(); openItem("netease"); }} />
-          </button>
-
-          <button
-            className="mp3 item dropTarget hasSprite"
-            onClick={() => openItem("mp3")}
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={() => handleDrop("mp3Dock")}
-            aria-label="旧 MP3 播放器"
-          >
-            <img className="itemSprite" src="/assets/items/mp3.png" alt="" draggable={false} />
-          </button>
-          <button className="lamp item hasSprite" onClick={() => openItem("lamp")} aria-label="台灯">
-            <img className="itemSprite" src="/assets/items/lamp.png" alt="" draggable={false} />
-          </button>
-        </div>
-
-        <div
-          className="tvDropZone"
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={() => handleDrop("tvDock")}
-          aria-label="把手机拖到电视旁边触发彩蛋"
-        />
-
-        <div className="snacks">
-          <button className="latiao item hasSprite" draggable onDragStart={() => setDragging("latiao")} onClick={() => openItem("latiao")} aria-label="辣条">
-            <img className="itemSprite" src="/assets/items/latiao.png" alt="" draggable={false} />
-          </button>
-          <button className="tea item hasSprite" onClick={() => openItem("tea")} aria-label="柠檬茶">
-            <img className="itemSprite" src="/assets/items/tea.png" alt="" draggable={false} />
-          </button>
-          <button className={`spinner item hasSprite ${popup?.title === "指尖陀螺转起来了" ? "spinNow" : ""}`} onClick={() => openItem("spinner")} aria-label="指尖陀螺">
-            <img className="itemSprite" src="/assets/items/spinner.png" alt="" draggable={false} />
-          </button>
-          <button className="examBook item hasSprite" onClick={() => openItem("examBook")} aria-label="五年高考三年模拟">
-            <img className="itemSprite" src="/assets/items/examBook.png" alt="" draggable={false} />
-          </button>
-          <button className="novel item hasSprite" onClick={() => openItem("novel")} aria-label="全职高手小说">
-            <img className="itemSprite" src="/assets/items/novel.png" alt="" draggable={false} />
-          </button>
-          <button className="watermelon item hasSprite" onDoubleClick={() => setPopup({ title: "半个西瓜", tag: "零食区 / 双击", body: "2018年的夏天，是没有西瓜就不完整的夏天。", kind: "egg" })} aria-label="半个西瓜">
-            <img className="itemSprite" src="/assets/items/watermelon.png" alt="" draggable={false} />
-          </button>
-          <button
-            className="fan item hasSprite snackPhone"
-            draggable
-            onDragStart={() => setDragging("phone")}
-            onClick={() => openItem("phone")}
-            aria-label="iPhone X"
-          >
-            <img className="itemSprite" src="/assets/items/phone.png" alt="" draggable={false} />
-            <i aria-label="微信" onClick={(event) => { event.stopPropagation(); openItem("wechat"); }} />
-            <i aria-label="网易云" onClick={(event) => { event.stopPropagation(); openItem("netease"); }} />
-          </button>
-        </div>
-
-        <button className="calendar item hasSprite" onClick={() => openItem("calendar")} aria-label="6月日历">
-          <img className="itemSprite" src="/assets/items/calendar.png" alt="" draggable={false} />
-        </button>
-        <button className="slippers item hasSprite" onClick={() => setPopup({ title: "地上的拖鞋", tag: "环境区 / 单击", body: "2018年夏天，你穿着这双拖鞋去楼下买冰棍。", kind: "egg" })} aria-label="地上的拖鞋">
-          <img className="itemSprite" src="/assets/items/slippers.png" alt="" draggable={false} />
-        </button>
-        <button className="trash item hasSprite" onClick={() => openItem("trash")} aria-label="垃圾桶">
-          <img className="itemSprite" src="/assets/items/trash.png" alt="" draggable={false} />
-        </button>
       </section>
 
-      <section className="notesPanel">
+      <section className="storyController" aria-label="剧情控制器">
         <div>
-          <h2>玩法</h2>
-          <p>在房间里随便逛：单击物品看记忆，双击部分物件触发特殊内容，把手机或辣条拖到特定位置会出现隐藏彩蛋。</p>
+          <p className="eyebrow">剧情控制器</p>
+          <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "残留记忆" : phase === "nodes" ? currentNode.title : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾旁白" : "系统确认"}</strong>
+          <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `记忆碎片 ${seenMemories.length} / ${memories.length}` : "剧情进行中"}</span>
         </div>
-        <div>
-          <h2>声音地图</h2>
-          <p>原创夏夜曲会在房间底噪、风扇低频和轻像素旋律之间循环，像一段没有歌词的 2018 深夜记忆。</p>
+        <div className="controllerActions">
+          {phase === "intro" && !introPhotoOpen && (
+            <>
+              <button onClick={() => setPackedIntroItems([])} type="button">重置收拾</button>
+              <button onClick={() => setPackedIntroItems(introPackItems)} type="button">一键收拾</button>
+              <button disabled={!introPackedDone} onClick={openIntroPhoto} type="button">进入照片</button>
+            </>
+          )}
+          {phase === "intro" && introPhotoOpen && <button onClick={() => setIntroPhotoOpen(false)} type="button">回到房间</button>}
+          <button onClick={resetStory} type="button">重开</button>
         </div>
       </section>
 
-      {popup && (
-        <div className="modalBackdrop" onClick={() => setPopup(null)}>
-          <article className={`modal ${popup.kind ? `modal-${popup.kind}` : ""}`} onClick={(event) => event.stopPropagation()}>
-            <button className="closeButton" onClick={() => setPopup(null)} aria-label="关闭弹窗">×</button>
-            {popup.kind === "phone" ? (
-              <div className="phoneOS">
-                <div className="phoneFrame">
-                  <div className="phoneStatus"><span>22:34</span><span>4G 82%</span></div>
-                  <div className="phoneScreen">
-                    {phoneApp === "home" && (
-                      <div className="phoneHome">
-                        <div className="phoneDate">
-                          <strong>6月14日</strong>
-                          <span>世界杯开幕夜</span>
-                        </div>
-                        <div className="appGrid">
-                          <button onClick={() => setPhoneApp("wechat")}><i className="appIcon green" />微信</button>
-                          <button onClick={() => setPhoneApp("netease")}><i className="appIcon red" />网易云</button>
-                          <button onClick={() => setPhoneApp("weibo")}><i className="appIcon orange" />微博</button>
-                          <button onClick={() => setPhoneApp("douyin")}><i className="appIcon dark" />抖音</button>
-                          <button onClick={() => setPhoneApp("album")}><i className="appIcon blue" />相册</button>
-                          <button onClick={() => setPhoneApp("calendar")}><i className="appIcon cream" />日历</button>
-                        </div>
-                      </div>
-                    )}
-
-                    {phoneApp === "wechat" && (
-                      <div className="phoneAppView">
-                        <PhoneTop title="微信" onBack={() => setPhoneApp("home")} />
-                        <div className="chatList">
-                          <button><b>高中同学群</b><span>今晚看揭幕战吗？冰可乐已就位。</span><em>22:31</em></button>
-                          <button><b>置顶的人</b><span>毕业照原图发你了，别又压缩。</span><em>20:18</em></button>
-                          <button><b>家庭群</b><span>早点睡，明天别赖床。</span><em>19:42</em></button>
-                        </div>
-                      </div>
-                    )}
-
-                    {phoneApp === "netease" && (
-                      <div className="phoneAppView">
-                        <PhoneTop title="网易云音乐" onBack={() => setPhoneApp("home")} />
-                        <div className="musicApp">
-                          <div className="recordDisc" />
-                          <strong>2018 夏夜原创曲</strong>
-                          <span>书桌旁 / 风扇 / 窗外橙色天光</span>
-                          <div className="musicBars"><i /><i /><i /><i /><i /></div>
-                          <button onClick={toggleMusic}>{musicOn ? "暂停背景音乐" : "播放背景音乐"}</button>
-                        </div>
-                      </div>
-                    )}
-
-                    {phoneApp === "weibo" && (
-                      <div className="phoneAppView">
-                        <PhoneTop title="微博" onBack={() => setPhoneApp("home")} />
-                        <div className="feedList">
-                          <article><b>#世界杯开幕#</b><p>四年一次的夏夜，又把所有人的屏幕点亮了。</p></article>
-                          <article><b>#我不是药神#</b><p>有人说电影看完以后，走出影院很久都没说话。</p></article>
-                          <article><b>#锦鲤转发#</b><p>转发这条，暑假作业自动写完。</p></article>
-                        </div>
-                      </div>
-                    )}
-
-                    {phoneApp === "douyin" && (
-                      <div className="phoneAppView">
-                        <PhoneTop title="抖音" onBack={() => setPhoneApp("home")} />
-                        <div className="shortVideo">
-                          <span>卡点舞 / 校服 / 操场黄昏</span>
-                          <b>2018 的短视频还带着一点新鲜感</b>
-                        </div>
-                      </div>
-                    )}
-
-                    {phoneApp === "album" && (
-                      <div className="phoneAppView">
-                        <PhoneTop title="相册" onBack={() => setPhoneApp("home")} />
-                        <div className="photoGrid">
-                          <button>毕业照</button><button>西瓜</button><button>网吧</button>
-                          <button>晚自习</button><button>电影票</button><button>截图</button>
-                        </div>
-                      </div>
-                    )}
-
-                    {phoneApp === "calendar" && (
-                      <div className="phoneAppView">
-                        <PhoneTop title="日历" onBack={() => setPhoneApp("home")} />
-                        <div className="phoneCalendar">
-                          <b>6.7 高考</b><b>6.14 世界杯</b><b>6.23 成团夜</b><b>7.5 药神</b><b>7.15 决赛</b>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+      {phase === "intro" && (
+        <section className={cx("curtain introCurtain", introPhotoOpen && "photoOpen")}>
+          {!introPhotoOpen ? (
+            <div className="introPackStage">
+              <div className="introRoom" aria-label="2027 年 6 月，研究生宿舍">
+                <div className="introWindow" aria-hidden="true" />
+                <div className="introShelf" aria-hidden="true" />
+                <div className="introPinboard" aria-hidden="true">
+                  <span>北京—南京<br />1078 公里</span>
+                  <i>2024 秋</i>
                 </div>
-                <aside className="phoneMemory">
-                  <p className="kicker">手机区域 / 可交互</p>
-                  <h2>2018 手机桌面</h2>
-                  <p>这次不是读一段文字，而是在手机里翻一会儿：群聊、歌单、热搜、相册和日历一起组成那年夏天。</p>
-                </aside>
+                <div className="introDesk">
+                  <button className={cx("packItem spritePack introLaptop", packedIntroItems.includes("laptop") && "packed")} onClick={() => packIntroItem("laptop")} type="button" aria-label="把旧笔记本电脑放进箱子"><img src="/assets/items/monitor.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introBook one", packedIntroItems.includes("books") && "packed")} onClick={() => packIntroItem("books")} type="button" aria-label="把旧书放进箱子"><img src="/assets/items/examBook.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introFolder", packedIntroItems.includes("folder") && "packed")} onClick={() => packIntroItem("folder")} type="button" aria-label="把文件夹放进箱子"><img src="/assets/items/drawer.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introLamp", packedIntroItems.includes("lamp") && "packed")} onClick={() => packIntroItem("lamp")} type="button" aria-label="把台灯放进箱子"><img src="/assets/items/lamp.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introKeyboard", packedIntroItems.includes("keyboard") && "packed")} onClick={() => packIntroItem("keyboard")} type="button" aria-label="把键盘放进箱子"><img src="/assets/items/keyboard.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introMp3", packedIntroItems.includes("mp3") && "packed")} onClick={() => packIntroItem("mp3")} type="button" aria-label="把银色 MP3 放进箱子"><img src="/assets/items/mp3.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introPhone", packedIntroItems.includes("phone") && "packed")} onClick={() => packIntroItem("phone")} type="button" aria-label="把手机放进箱子"><img src="/assets/items/phone.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introMouse", packedIntroItems.includes("mouse") && "packed")} onClick={() => packIntroItem("mouse")} type="button" aria-label="把鼠标放进箱子"><img src="/assets/items/mouse.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introCup", packedIntroItems.includes("cup") && "packed")} onClick={() => packIntroItem("cup")} type="button" aria-label="把水杯放进箱子"><img src="/assets/items/tea.png" alt="" draggable={false} /></button>
+                  <button className={cx("packItem spritePack introScarf", packedIntroItems.includes("scarf") && "packed")} onClick={() => packIntroItem("scarf")} type="button" aria-label="把围巾放进箱子"><img src="/assets/items/cable.png" alt="" draggable={false} /></button>
+                </div>
+                <button className={cx("packItem spritePack introCalendarLoose", packedIntroItems.includes("calendar") && "packed")} onClick={() => packIntroItem("calendar")} type="button" aria-label="把日历放进箱子"><img src="/assets/items/calendar.png" alt="" draggable={false} /></button>
+                <div className="introBox">
+                  <b>毕业</b>
+                  <span>{introPackedCount} / {introPackItems.length}</span>
+                  <small>点击物品收进箱子</small>
+                </div>
+                {introPackedDone && <button
+                  className={cx("introPhoto", introPackedDone && "revealed")}
+                  onDoubleClick={openIntroPhoto}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") openIntroPhoto();
+                  }}
+                  type="button"
+                  aria-label="双击照片，全屏放大"
+                >
+                  <i />
+                  <span>2024 夏</span>
+                </button>}
+              </div>
+              <article className="visualNovelBox introDialogue">
+                <div className="speakerName">旁白</div>
+                <p>{introPackedDone ? "研究生宿舍的房间里，箱子已经合上了一半。" : "研究生宿舍的房间里，箱子摊在地上。"}</p>
+                <p>{introPackLine}</p>
+                <span>{introPackedDone ? "双击照片" : "点击物品收拾"}</span>
+              </article>
+            </div>
+          ) : (
+            <article className="storyCard introScreen">
+              <p className="eyebrow">开场画面 / 第一次问</p>
+              <div className={cx("fullscreenPhoto", introPhotoLineIndex === introPhotoLines.length - 1 && "distorting")} aria-hidden="true">
+                <img className="memoryPhotoImage" src="/assets/story/summer-2024-couple-photo.png" alt="" draggable={false} />
+                <span className="photoNoise" />
+              </div>
+              <button className="visualNovelBox photoDialogue" onClick={advanceIntroPhotoLine} onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  advanceIntroPhotoLine();
+                }
+              }} type="button">
+                <span className="speakerName">我</span>
+                <p>{introPhotoLines[introPhotoLineIndex]}</p>
+                <i>{introPhotoLineIndex < introPhotoLines.length - 1 ? "点击继续" : "画面开始失真"}</i>
+              </button>
+              {introPhotoLineIndex === introPhotoLines.length - 1 && (
+                <>
+                  <div className="systemBox">
+                    <p>电脑屏幕出现波纹。照片变成模糊的噪点。</p>
+                    <p>慢慢清晰——但背景变了。</p>
+                    <strong>你现在看到的是 2024 年。你还要回去吗？</strong>
+                  </div>
+                  <button onClick={() => setPhase("room")} type="button">是。查看残留记忆</button>
+                </>
+              )}
+            </article>
+          )}
+        </section>
+      )}
+
+      {phase === "room" && (
+        <>
+          <section className="room pixelRoom">
+            <div className="wallGlow" aria-hidden="true" />
+            <div className="roomDepth" aria-hidden="true" />
+            <div className="bookcase" aria-hidden="true">
+              <span className="shelf shelfTop" />
+              <span className="shelf shelfMid" />
+              <span className="shelf shelfLow" />
+            </div>
+            <div className="pinboard" aria-hidden="true">
+              <span className="pinNote">北京—南京<br />1078 公里</span>
+              <span className="pinPhoto">2024 秋</span>
+            </div>
+            <button className="window item hasSprite" onClick={() => openMemory(memories[0])} aria-label="窗外梧桐">
+              <img className="itemSprite" src="/assets/items/window-night.png" alt="" draggable={false} />
+              <span>梧桐树影</span>
+            </button>
+            <button className="calendar item hasSprite storyCalendar" onClick={() => openMemory(memories[1])} aria-label="2024 年日历">
+              <img className="itemSprite" src="/assets/items/calendar.png" alt="" draggable={false} />
+            </button>
+            <div className="box pixelBox">毕业</div>
+            <div className="desk">
+              <button className={cx("monitor item hasSprite memoryItem", seenMemories.includes("computer") && "seen")} onClick={() => openMemory(memories[0])} type="button" aria-label="旧笔记本电脑">
+                <img className="itemSprite" src="/assets/items/monitor.png" alt="" draggable={false} />
+                <span>旧笔记本</span>
+              </button>
+              <button className="keyboard item hasSprite" onClick={() => openMemory(memories[0])} aria-label="键盘" type="button">
+                <img className="itemSprite" src="/assets/items/keyboard.png" alt="" draggable={false} />
+              </button>
+              <button className="mouse item hasSprite" onClick={() => openMemory(memories[0])} aria-label="鼠标" type="button">
+                <img className="itemSprite" src="/assets/items/mouse.png" alt="" draggable={false} />
+              </button>
+              <button className={cx("phone item hasSprite memoryItem", seenMemories.includes("phone") && "seen")} onClick={() => openMemory(memories[1])} type="button" aria-label="手机">
+                <img className="itemSprite" src="/assets/items/phone.png" alt="" draggable={false} />
+                <span>手机</span>
+              </button>
+              <button className={cx("mp3 item hasSprite memoryItem", seenMemories.includes("mp3") && "seen")} onClick={() => openMemory(memories[2])} type="button" aria-label="银色 MP3">
+                <img className="itemSprite" src="/assets/items/mp3.png" alt="" draggable={false} />
+                <span>银色 MP3</span>
+              </button>
+              <button className="lamp item hasSprite" onClick={() => openMemory(memories[2])} aria-label="台灯" type="button">
+                <img className="itemSprite" src="/assets/items/lamp.png" alt="" draggable={false} />
+              </button>
+              <button className={cx("recycle storyRecycle item memoryItem", seenMemories.includes("recycle") && "seen")} onClick={() => openMemory(memories[3])} type="button" aria-label="回收站">
+                <span>回收站</span>
+              </button>
+            </div>
+            <button className="slippers item hasSprite" onClick={() => openMemory(memories[1])} aria-label="拖鞋" type="button">
+              <img className="itemSprite" src="/assets/items/slippers.png" alt="" draggable={false} />
+            </button>
+            <button className="trash item hasSprite" onClick={() => openMemory(memories[3])} aria-label="纸箱旁的垃圾桶" type="button">
+              <img className="itemSprite" src="/assets/items/trash.png" alt="" draggable={false} />
+            </button>
+          </section>
+
+          <section className="memoryDock" aria-label="记忆校准进度">
+            {memories.map((memory) => (
+              <button className={seenMemories.includes(memory.id) ? "done" : ""} onClick={() => openMemory(memory)} key={memory.id} type="button">
+                <b>{memory.title}</b>
+                <span>{memory.summary}</span>
+              </button>
+            ))}
+          </section>
+
+          {canSecondAsk && (
+            <div className="floatingAction">
+              <button onClick={() => setPhase("secondAsk")} type="button">全部看完了。继续</button>
+            </div>
+          )}
+        </>
+      )}
+
+      {phase === "secondAsk" && (
+        <section className="curtain">
+          <article className="storyCard wide">
+            <p className="eyebrow">第二次问 / 知情选择</p>
+            <h2>现在你已经看到了结局。</h2>
+            <p>2024 年南京的夏天，她笑得很开心。2025 年北京的南京大牌档，她一个人站在门口。2026 年电话里，她说“要不我们先分开吧”。你说了“好”。</p>
+            <div className="systemBox">
+              <p>你改变不了已经发生的事。</p>
+              <p>你知道那些话救不了这段关系。</p>
+              <p>你也知道重新经历这些，只会让你再失去她一次。</p>
+              <strong>即使这样，你仍然要回去吗？</strong>
+            </div>
+            <button onClick={() => setPhase("nodes")} type="button">是。正式启动</button>
+          </article>
+        </section>
+      )}
+
+      {phase === "nodes" && currentNode && (
+        <section className="nodeStage">
+          <div className="sceneSwitcher" aria-label="当前回溯场景">
+            {nodes.map((node, index) => (
+              <button
+                className={index === nodeIndex ? "active" : ""}
+                disabled={index > nodeIndex}
+                onClick={() => {
+                  setNodeIndex(index);
+                  setActiveChoice(null);
+                }}
+                key={node.id}
+                type="button"
+              >
+                <small>0{index + 1}</small>
+                <span>{node.title}</span>
+              </button>
+            ))}
+          </div>
+          <article className="nodeCard">
+            <SceneVisual node={currentNode} activeChoice={activeChoice} />
+            <div className="nodeScript">
+              <p className="eyebrow">{currentNode.eyebrow}</p>
+              <h2>{currentNode.title}</h2>
+              <p className="scene">{currentNode.scene}</p>
+              <div className="dialogue">
+                {currentNode.prompt.map((line) => <p key={line}>{line}</p>)}
+              </div>
+              {currentNode.system && <div className="systemBox compact">{currentNode.system}</div>}
+
+              {!activeChoice && (
+                <div className="silenceMeter">
+                  <span>沉默</span>
+                  <i />
+                  <small>{currentNode.id === "plane" ? "风停住了。她在等。" : currentNode.id === "station" ? "广播第二次响起。你还有三句话的时间。" : "她低头拧开水瓶，声音在安静里很响。"}</small>
+                </div>
+              )}
+
+              {!activeChoice ? (
+                <div className="choiceGrid">
+                  {currentNode.choices.map((choice) => (
+                    <button onClick={() => chooseNode(choice)} key={choice.key} type="button">
+                      <i>{choice.key}</i>
+                      <span>{choice.text}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="responsePanel">
+                  <p className="eyebrow">你选择了 {activeChoice.key}</p>
+                  {activeChoice.response.map((line) => <p key={line}>{line}</p>)}
+                  <hr />
+                  {currentNode.closing.map((line) => <p key={line}>{line}</p>)}
+                  <div className="transitionLine">{getTransitionText(currentNode.id)}</div>
+                  <button onClick={continueNode} type="button">{nodeIndex < nodes.length - 1 ? "切换到下一个场景" : "回到 2027 宿舍"}</button>
+                </div>
+              )}
+            </div>
+          </article>
+        </section>
+      )}
+
+      {phase === "system" && (
+        <section className="curtain">
+          <article className="storyCard wide">
+            <p className="eyebrow">系统揭示</p>
+            <h2>你改变的从来不是结局。</h2>
+            <div className="systemBox">
+              <p>三个节点，你都走完了。</p>
+              <p>你回去寻找让她留下的方法。现在你知道答案了。</p>
+              <strong>你改变的是她记忆里的你。</strong>
+              <p>哪怕只有几秒。哪怕那些声音留不住她。</p>
+            </div>
+            <p>画面从南京南站淡出。2027 年的宿舍重新亮起来。南京还是南京。梧桐还是梧桐。</p>
+            <button onClick={() => setPhase("farewell")} type="button">整理旧照片</button>
+          </article>
+        </section>
+      )}
+
+      {phase === "farewell" && (
+        <section className="phoneFinal">
+          <article className="moments">
+            <p className="eyebrow">朋友圈</p>
+            <h2>旧照片已整理。是否发到朋友圈？</h2>
+            <div className="photoPost">
+              <div className="photoPlane">梧桐大道 / 2024 秋天</div>
+              <p>收拾东西翻到的。2024 年秋天，南京。那时候真好。</p>
+              <span>林小满：2024 年……好怀念啊。她最近在北京升职了。你俩还有联系吗？</span>
+              <strong>周也 赞了你的朋友圈。</strong>
+            </div>
+          </article>
+
+          <article className="chatCard">
+            <p className="eyebrow">私聊消息</p>
+            <div className="chat">
+              <p className="other">周也：梧桐大道。你还留着这张啊。</p>
+              <p className="me">我：留了三年了。每次看到都觉得那时候真好。</p>
+              <p className="other">周也：那时候确实挺好的。</p>
+              <p className="other">周也：南京的梧桐。</p>
+              <p className="other echo">周也：{echoByPlaneChoice[planeChoice]}</p>
+              <p className="me">我：走。但没以前那么勤了。有时候路过会慢一点。</p>
+              <p className="other">周也：我后来在北京路过南京大牌档的时候，会站在门口看一下。然后走了。</p>
+              <p className="other">周也：我们那时候都不容易。我知道你也不容易。</p>
+              <p className="me">我：你也不容易。</p>
+              <p className="other">周也：嗯。那这次好好说再见吧。别再留着什么没说完的话了。</p>
+            </div>
+
+            {!farewellChoice ? (
+              <div className="choiceGrid finalChoices">
+                {finalChoices.map((choice) => (
+                  <button onClick={() => setFarewellChoice(choice)} key={choice} type="button">
+                    <span>{choice}</span>
+                  </button>
+                ))}
               </div>
             ) : (
+              <div className="responsePanel">
+                <p className="me">我：{farewellChoice}</p>
+                {farewellChoice.includes("爱过") && (
+                  <>
+                    <p className="other">周也：我现在知道了。</p>
+                    <p className="other">周也：其实有些时候，我也听见了。</p>
+                    <p className="other">周也：只是我们还是走到了这里。</p>
+                  </>
+                )}
+                <p className="other">周也：再见啦。真的再见了。</p>
+                <button onClick={() => setPhase("ending")} type="button">好好说再见</button>
+              </div>
+            )}
+          </article>
+        </section>
+      )}
+
+      {phase === "ending" && (
+        <section className="curtain final">
+          <article className="endingText">
+            {[
+              "2027 年 6 月。",
+              "南京的梧桐又绿了。",
+              "分开，不是谁不够好。",
+              "是她在北京深夜加班的时候，我只能说“辛苦了”。",
+              "是她提前十二天申请，写“勿改”，然后在花坛边等了快两个小时。",
+              "是我去了北京，在她公司楼下等了快五个小时，然后我们只坐了十分钟。",
+              "是她最后问我有什么要说的，我说了。",
+              "但太晚了。也不是太晚。",
+              "就是时间到了。",
+              "我没有改变我们分开的结局。",
+              "只是后来，她的记忆里，多了几句我的声音。",
+              "那些声音留不住她。",
+              "但那些日子，是真实的。",
+              "这次好好说再见了。真的再见了。"
+            ].map((line) => <p key={line}>{line}</p>)}
+            <button onClick={() => {
+              resetStory();
+            }} type="button">重新开始</button>
+          </article>
+        </section>
+      )}
+
+      {openedMemory && (
+        <div className="modalBackdrop" onClick={() => setOpenedMemory(null)}>
+          <article className={cx("memoryModal", openedMemory.id === "computer" && "modalDesktop", openedMemory.id === "phone" && "modalPhone")} onClick={(event) => event.stopPropagation()}>
+            <button className="close" onClick={() => setOpenedMemory(null)} aria-label="关闭" type="button">×</button>
+            {openedMemory.id === "computer" ? (
+              <DesktopMemory memory={openedMemory} markSeen={() => markMemorySeen("computer")} />
+            ) : openedMemory.id === "phone" ? (
+              <PhoneMemory markSeen={() => markMemorySeen("phone")} />
+            ) : (
               <>
-                <p className="kicker">{popup.tag}</p>
-                <h2>{popup.title}</h2>
-                {popup.kind === "desktop" && <div className="fakeDesktop"><span>回收站</span><span>英雄联盟</span><span>4399</span><span>QQ</span></div>}
-                {popup.kind === "music" && <div className="fakePlayer"><strong>2018 夏夜歌单</strong><i /></div>}
-                {popup.kind === "tv" && <div className="fakeVideo"><span>{channels[channel]}</span></div>}
-                {popup.kind === "calendar" && <div className="fakeCalendar"><b>6.7 高考</b><b>6.14 世界杯</b><b>6.23 101决赛</b><b>7.15 决赛</b></div>}
-                <p>{popup.body}</p>
-                {popup.detail && <strong>{popup.detail}</strong>}
+                <p className="eyebrow">{openedMemory.place}</p>
+                <h2>{openedMemory.title}</h2>
+                <p className="summary">{openedMemory.summary}</p>
+                <div className="memoryLines">
+                  {openedMemory.lines.map((line) => <p key={line}>{line}</p>)}
+                </div>
+                <div className="systemBox compact">{openedMemory.note}</div>
+                <button onClick={() => setOpenedMemory(null)} type="button">收起这段记忆</button>
               </>
             )}
           </article>

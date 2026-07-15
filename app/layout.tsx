@@ -2,8 +2,8 @@
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "回到2018",
-  description: "一间 2018 年深夜房间形式的轻叙事互动游戏原型"
+  title: "《离别》南京版",
+  description: "根据《离别》剧情完整文档改写的南京版互动叙事原型"
 };
 
 export default function RootLayout({
