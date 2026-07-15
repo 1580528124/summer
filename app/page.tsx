@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Phase = "intro" | "room" | "secondAsk" | "nodes" | "system" | "farewell" | "ending";
 type MemoryId = "computer" | "phone" | "mp3" | "recycle";
@@ -9,6 +9,7 @@ type ChoiceKey = "A" | "B" | "C" | "D" | "E";
 type PhoneApp = "home" | "wechat" | "zhouye" | "moments" | "album" | "calendar";
 type DesktopApp = "folder" | "tickets" | "recycle" | "notes";
 type IntroPackItem = "laptop" | "books" | "folder" | "calendar" | "lamp" | "keyboard" | "mp3" | "phone" | "mouse" | "cup" | "scarf";
+type GuidePhoneView = "home" | "wechatList" | "chat";
 
 type Memory = {
   id: MemoryId;
@@ -34,6 +35,31 @@ type StoryNode = {
   system?: string;
   choices: StoryChoice[];
   closing: string[];
+};
+
+type GuidedBeat = {
+  memoryId: MemoryId;
+  time: string;
+  title: string;
+  message: string;
+  cta: string;
+  after: string;
+};
+
+type VnLine = {
+  speaker: string;
+  text: string;
+  kind?: "dialogue" | "system" | "narration";
+};
+
+type DesktopGuideBeat = {
+  app: DesktopApp;
+  icon: string;
+  title: string;
+  meta: string;
+  speaker: string;
+  text: string;
+  detail: string;
 };
 
 const memories: Memory[] = [
@@ -83,6 +109,15 @@ const memories: Memory[] = [
     place: "毕业.mp4",
     summary: "2025 年毕业典礼，被删除又恢复的视频。",
     lines: [
+      "周也：笑一个。今天毕业了。",
+      "主角：（笑得很短）",
+      "周也：你这笑得什么啊。",
+      "周也：算了。我明天就去北京了。",
+      "周也：你去送我吗？",
+      "主角：去。",
+      "周也：真的？",
+      "主角：真的。",
+      "周也：那行。我记住了。",
       "周也：你以后想我了，就看看这个视频。毕业快乐。",
       "周也：还有，你以后别什么都闷在心里了。你想说什么就说。",
       "主角：我尽量。",
@@ -90,6 +125,41 @@ const memories: Memory[] = [
       "最后三秒，画面暗了，她轻声说：要是有你在北京就好了。"
     ],
     note: "这个视频你 2025 年看过一次。她走之后你删了。2027 年，你把它恢复了。"
+  }
+];
+
+const guidedBeats: GuidedBeat[] = [
+  {
+    memoryId: "phone",
+    time: "23:47",
+    title: "周也",
+    message: "你还留着那台旧手机吗？我刚才突然想起，我们那时候好像什么都说了，又什么都没说。",
+    cta: "打开周也的聊天",
+    after: "聊天记录亮起来，像有人把 2025 年的夜晚重新推到你面前。"
+  },
+  {
+    memoryId: "computer",
+    time: "23:51",
+    title: "周也",
+    message: "你电脑里应该还有那些车票和攻略吧。你总说以后再说，可你其实把很多“以后”都存起来了。",
+    cta: "查看旧电脑",
+    after: "桌上的笔记本自动亮屏，文件夹里全是没有兑现的以后。"
+  },
+  {
+    memoryId: "mp3",
+    time: "00:03",
+    title: "周也",
+    message: "那个银色 MP3，你不要再当成杂物了。里面有些话，我当时没来得及发给你。",
+    cta: "播放 MP3 录音",
+    after: "录音的电流声很轻，她的声音从很远的地方回来。"
+  },
+  {
+    memoryId: "recycle",
+    time: "00:12",
+    title: "周也",
+    message: "最后，去回收站恢复那个毕业视频吧。你删掉的不是文件，是她离开南京前最后一次等你开口。",
+    cta: "恢复并播放 毕业.mp4",
+    after: "毕业视频恢复完成。她说“你以后别什么都闷在心里了”，画面暗下去后，又轻声说了一句。"
   }
 ];
 
@@ -163,9 +233,10 @@ const nodes: StoryNode[] = [
     id: "station",
     eyebrow: "节点三 / 2025 年 6 月",
     title: "南京南站",
-    scene: "南京南站北广场。广播声循环。她拖着行李箱，回头看你。",
+    scene: "南京南站北广场。玻璃幕墙反射着午后的光。她拖着银灰色行李箱，帆布袋挂在手腕上，回头看你。",
     prompt: [
       "周也：我下周排班出来了。不休。组长说这个月都不休。",
+      "周也：下次回来，可能是下个月了。也可能不是。",
       "周也：我那个车次开始检票了。你有什么要跟我说的吗？"
     ],
     system: "她这次问你了。当年她没问。你还有三句话的时间。",
@@ -230,12 +301,82 @@ function PhoneTop({ title, onBack }: { title: string; onBack: () => void }) {
   );
 }
 
+function speakerLabel(speaker?: string) {
+  return speaker === "我" || speaker === "周也" ? speaker : "";
+}
+
 function DesktopMemory({ memory, markSeen }: { memory: Memory; markSeen: () => void }) {
   const [activeApp, setActiveApp] = useState<DesktopApp>("folder");
+  const [desktopStep, setDesktopStep] = useState(0);
+  const [desktopInspected, setDesktopInspected] = useState(false);
+  const desktopGuide: DesktopGuideBeat[] = [
+    {
+      app: "folder",
+      icon: "🖼",
+      title: "她的排班.jpg",
+      meta: "周也 休 周四 周五 · 勿改",
+      speaker: "",
+      text: "文件夹“以后”打开了。第一个亮起来的是她的排班截图。",
+      detail: "她提前十二天申请，在备注里写：去南京。票已买。勿改。"
+    },
+    {
+      app: "tickets",
+      icon: "🚄",
+      title: "南京南→北京南 G6",
+      meta: "¥558.5 · 收藏时间 2024 年 12 月",
+      speaker: "我",
+      text: "那时候我收藏了去北京的票。收藏了很多次，但没有告诉她。",
+      detail: "南京南到北京南，四个多小时。你把它放进收藏夹，像把一句话放回喉咙里。"
+    },
+    {
+      app: "tickets",
+      icon: "🚄",
+      title: "北京南→南京南 G23",
+      meta: "¥558.5 · 收藏时间 2024 年 12 月",
+      speaker: "",
+      text: "下一张票根被翻出来。北京南到南京南，是她回来的方向。",
+      detail: "她来了一次，你去了四次。每一次都像在证明你们还够近。"
+    },
+    {
+      app: "notes",
+      icon: "🗺",
+      title: "北京攻略截图",
+      meta: "等她安顿好了，我去找她。",
+      speaker: "我",
+      text: "我甚至存过攻略。想等她安顿好了，再去找她。",
+      detail: "你把先锋书店、颐和路、紫金山也一起存着。好像计划越完整，话就越不用现在说。"
+    },
+    {
+      app: "notes",
+      icon: "💬",
+      title: "2025年3月聊天记录",
+      meta: "她拿到 offer，他说“恭喜”。",
+      speaker: "周也",
+      text: "你之前不是说考北京吗？",
+      detail: "你说：没考上。她问：你一直没跟我说？你说：怕你担心。"
+    }
+  ];
+  const currentDesktopBeat = desktopGuide[desktopStep];
+  const desktopDone = desktopStep >= desktopGuide.length - 1 && desktopInspected;
 
   function openApp(app: DesktopApp) {
     setActiveApp(app);
     markSeen();
+  }
+
+  function advanceDesktopGuide() {
+    markSeen();
+    setActiveApp(currentDesktopBeat.app);
+    if (!desktopInspected) {
+      setDesktopInspected(true);
+      return;
+    }
+    if (desktopStep < desktopGuide.length - 1) {
+      const nextStep = desktopStep + 1;
+      setDesktopStep(nextStep);
+      setActiveApp(desktopGuide[nextStep].app);
+      setDesktopInspected(false);
+    }
   }
 
   return (
@@ -244,9 +385,9 @@ function DesktopMemory({ memory, markSeen }: { memory: Memory; markSeen: () => v
         <div className="desktopBrand"><span>Windows</span><small>2027 · 南京宿舍</small></div>
         <div className="desktopApps">
           <button onClick={() => openApp("folder")} type="button"><i className="pixelAppIcon folderPixel">文</i><span>以后</span></button>
-          <button onClick={() => openApp("tickets")} type="button"><i className="pixelAppIcon ticketPixel">G</i><span>高铁票根</span></button>
-          <button onClick={() => openApp("recycle")} type="button"><i className="pixelAppIcon recyclePixel">♻</i><span>回收站</span></button>
-          <button onClick={() => openApp("notes")} type="button"><i className="pixelAppIcon notePixel">记</i><span>备忘录</span></button>
+          <button disabled={desktopStep < 1} onClick={() => openApp("tickets")} type="button"><i className="pixelAppIcon ticketPixel">G</i><span>高铁票根</span></button>
+          <button disabled type="button"><i className="pixelAppIcon recyclePixel">♻</i><span>回收站</span></button>
+          <button disabled={desktopStep < 3} onClick={() => openApp("notes")} type="button"><i className="pixelAppIcon notePixel">记</i><span>备忘录</span></button>
         </div>
 
         <section className={`desktopWindow desktopWindow-${activeApp}`}>
@@ -265,19 +406,25 @@ function DesktopMemory({ memory, markSeen }: { memory: Memory; markSeen: () => v
                 <span>回收站</span>
               </aside>
               <main>
-                <button onClick={() => openApp("tickets")} type="button"><i>🖼</i><b>她的排班.jpg</b><small>周也 休 周四 周五 · 勿改</small></button>
-                <button type="button"><i>🚄</i><b>南京南→北京南 G6</b><small>¥558.5 · 收藏时间 2024 年 12 月</small></button>
-                <button type="button"><i>🚄</i><b>北京南→南京南 G23</b><small>¥558.5 · 收藏时间 2024 年 12 月</small></button>
-                <button onClick={() => openApp("notes")} type="button"><i>🗺</i><b>北京攻略截图</b><small>等她安顿好了，我去找她。</small></button>
-                <button type="button"><i>💬</i><b>2025年3月聊天记录</b><small>她拿到 offer，他说“恭喜”。</small></button>
+                {desktopGuide.map((beat, index) => (
+                  <button
+                    className={cx(index < desktopStep && "seenFile", index === desktopStep && "activeFile", index > desktopStep && "lockedFile")}
+                    disabled={index !== desktopStep}
+                    onClick={advanceDesktopGuide}
+                    type="button"
+                    key={beat.title}
+                  >
+                    <i>{beat.icon}</i><b>{beat.title}</b><small>{index > desktopStep ? "等待前一个文件读取完成" : beat.meta}</small>
+                  </button>
+                ))}
               </main>
             </div>
           )}
 
           {activeApp === "tickets" && (
             <div className="ticketWall">
-              <article><b>南京南 → 北京南</b><span>G6 · ¥558.5</span><small>收藏了，却没说出口。</small></article>
-              <article><b>北京南 → 南京南</b><span>G23 · ¥558.5</span><small>她来了一次，他去了四次。</small></article>
+              <article className={desktopStep === 1 ? "activeRecord" : ""}><b>南京南 → 北京南</b><span>G6 · ¥558.5</span><small>收藏了，却没说出口。</small></article>
+              <article className={desktopStep === 2 ? "activeRecord" : ""}><b>北京南 → 南京南</b><span>G23 · ¥558.5</span><small>她来了一次，他去了四次。</small></article>
               <article className="danger"><b>已退票订单</b><span>2025-11-11 23:47</span><small>她在输液室给我发“多喝热水”的时候，我在退票。</small></article>
             </div>
           )}
@@ -293,11 +440,16 @@ function DesktopMemory({ memory, markSeen }: { memory: Memory; markSeen: () => v
 
           {activeApp === "notes" && (
             <div className="desktopNotes">
+              <p>{currentDesktopBeat.detail}</p>
               <p>{memory.note}</p>
-              <p>你以为爱是等准备好了再给她。但爱不是。爱是哪怕没准备好，也要让她知道你在。</p>
             </div>
           )}
         </section>
+        <button className={cx("desktopGuideDialogue", !speakerLabel(desktopDone ? "" : currentDesktopBeat.speaker) && "noSpeaker", currentDesktopBeat.speaker === "我" && "meLine", currentDesktopBeat.speaker === "周也" && "zhouyeLine")} onClick={desktopDone ? undefined : advanceDesktopGuide} type="button">
+          {speakerLabel(desktopDone ? "" : currentDesktopBeat.speaker) && <span>{speakerLabel(currentDesktopBeat.speaker)}</span>}
+          <p>{desktopDone ? "文件夹里的“以后”已经读完。那些没说出口的话，正在变成下一段记忆。" : desktopInspected ? currentDesktopBeat.detail : currentDesktopBeat.text}</p>
+          <i>{desktopDone ? "已完成" : desktopInspected ? desktopStep < desktopGuide.length - 1 ? "点击读取下一个文件" : "文件夹读取完成" : `点击查看：${currentDesktopBeat.title}`}</i>
+        </button>
       </div>
     </div>
   );
@@ -382,7 +534,7 @@ function PhoneMemory({ markSeen }: { markSeen: () => void }) {
               <div className="feedList">
                 <article><b>我</b><p>收拾东西翻到的。2024 年秋天，南京。那时候真好。</p></article>
                 <article><b>林小满</b><p>2024 年……好怀念啊。她最近在北京升职了。</p></article>
-                <article><b>系统通知</b><p>周也 赞了你的朋友圈。</p></article>
+                <article><b>通知</b><p>周也 赞了你的朋友圈。</p></article>
               </div>
             </div>
           )}
@@ -404,8 +556,40 @@ function PhoneMemory({ markSeen }: { markSeen: () => void }) {
       <aside className="phoneMemoryText">
         <p className="eyebrow">手机 / 聊天记录</p>
         <h2>她等你开口的那些地方，都还亮着。</h2>
-        <p>这里保留原来的手机系统交互：桌面、微信、相册、朋友圈和日历。内容已经全部换成《离别》的南京线索。</p>
+        <p>这里保留原来的手机交互：桌面、微信、相册、朋友圈和日历。内容已经全部换成《离别》的南京线索。</p>
       </aside>
+    </div>
+  );
+}
+
+function GraduationVideoMemory({ memory, onClose }: { memory: Memory; onClose: () => void }) {
+  return (
+    <div className="graduationVideo">
+      <p className="eyebrow">{memory.place} / 已从回收站恢复</p>
+      <div className="videoPlayer">
+        <div className="videoFrame">
+          <div className="videoSky" />
+          <div className="videoBleachers"><i /><i /><i /></div>
+          <div className="videoPerson videoMe" />
+          <div className="videoPerson videoZhouye" />
+          <div className="videoTimestamp">2025.06 南京 · 毕业典礼</div>
+          <div className="videoRec">REC</div>
+        </div>
+        <div className="videoControls">
+          <span />
+          <b>毕业.mp4</b>
+          <small>03:18 / 03:18</small>
+        </div>
+      </div>
+      <div className="videoScript">
+        {memory.lines.map((line) => <p key={line}>{line}</p>)}
+      </div>
+      <div className="systemBox compact">
+        {memory.note}
+        <br />
+        窗外梧桐树还是绿的。你把这个视频看了三遍，才终于按下继续。
+      </div>
+      <button onClick={onClose} type="button">收起毕业视频</button>
     </div>
   );
 }
@@ -435,6 +619,14 @@ function getSceneHint(nodeId: NodeId, activeChoice: StoryChoice | null) {
   return "广播：G……次列车即将停止检票。玻璃幕墙上人影来来往往。";
 }
 
+function parseVnLine(line: string): VnLine {
+  const [speaker, ...rest] = line.split("：");
+  if (rest.length > 0 && speaker.length <= 4) {
+    return { speaker, text: rest.join("："), kind: "dialogue" };
+  }
+  return { speaker: "", text: line, kind: "narration" };
+}
+
 function SceneVisual({ node, activeChoice }: { node: StoryNode; activeChoice: StoryChoice | null }) {
   const choiceClass = activeChoice ? `choice-${activeChoice.key.toLowerCase()}` : "choice-waiting";
 
@@ -459,10 +651,14 @@ function SceneVisual({ node, activeChoice }: { node: StoryNode; activeChoice: St
         <>
           <div className="treeCanopy"><i /><i /><i /><i /><i /></div>
           <div className="leafRoad"><i /><i /><i /><i /><i /><i /></div>
+          <div className="leafForeground"><i /><i /></div>
+          <div className="streetDepth"><i /><i /><i /></div>
           <div className="bike" />
+          <div className="bikeBasket" />
           <div className="windLine one" />
           <div className="windLine two" />
           <div className="focusFrame" />
+          <div className="shoulderLeaf" />
         </>
       )}
 
@@ -470,8 +666,11 @@ function SceneVisual({ node, activeChoice }: { node: StoryNode; activeChoice: St
         <>
           <div className="stationGlass"><i /><i /><i /><i /></div>
           <div className="stationSign">南京南站</div>
+          <div className="stationCrowd"><i /><i /><i /><i /></div>
           <div className="ticketStub" />
           <div className="suitcase" />
+          <div className="toteBag" />
+          <div className="phonePolaroid" />
           <div className="securityRail" />
           <div className="broadcastTicker">{activeChoice?.key === "E" ? "G……次列车停止检票" : activeChoice?.key === "A" ? "G……次列车开始检票" : "G……次列车即将停止检票"}</div>
         </>
@@ -488,6 +687,7 @@ function SceneVisual({ node, activeChoice }: { node: StoryNode; activeChoice: St
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [introPhotoOpen, setIntroPhotoOpen] = useState(false);
+  const [introPackNarrationVisible, setIntroPackNarrationVisible] = useState(true);
   const [introPhotoLineIndex, setIntroPhotoLineIndex] = useState(0);
   const [packedIntroItems, setPackedIntroItems] = useState<IntroPackItem[]>([]);
   const [openedMemory, setOpenedMemory] = useState<Memory | null>(null);
@@ -495,31 +695,74 @@ export default function Home() {
   const [nodeIndex, setNodeIndex] = useState(0);
   const [nodeChoices, setNodeChoices] = useState<Partial<Record<NodeId, ChoiceKey>>>({});
   const [activeChoice, setActiveChoice] = useState<StoryChoice | null>(null);
+  const [vnLineIndex, setVnLineIndex] = useState(0);
+  const [responseLineIndex, setResponseLineIndex] = useState(0);
+  const [secondAskLineIndex, setSecondAskLineIndex] = useState(0);
+  const [guidePhoneOpen, setGuidePhoneOpen] = useState(false);
+  const [guidePhoneView, setGuidePhoneView] = useState<GuidePhoneView>("home");
   const [farewellChoice, setFarewellChoice] = useState<string | null>(null);
 
-  const progress = Math.round((seenMemories.length / memories.length) * 100);
   const currentNode = nodes[nodeIndex];
   const planeChoice = nodeChoices.plane ?? "D";
-  const canSecondAsk = seenMemories.length === memories.length;
+  const guidedBeat = guidedBeats[seenMemories.length];
+  const nodeIntroLines: VnLine[] = [
+    { speaker: "", text: currentNode.scene, kind: "narration" },
+    ...currentNode.prompt.map(parseVnLine),
+    ...(currentNode.system ? [{ speaker: "", text: currentNode.system, kind: "system" as const }] : [])
+  ];
+  const currentVnLine = nodeIntroLines[Math.min(vnLineIndex, nodeIntroLines.length - 1)];
+  const choicesReady = vnLineIndex >= nodeIntroLines.length - 1;
+  const responseLines: VnLine[] = activeChoice
+    ? [
+        { speaker: "我", text: activeChoice.text, kind: "dialogue" },
+        ...activeChoice.response.map(parseVnLine),
+        ...currentNode.closing.map((line) => ({ speaker: "", text: line, kind: "narration" as const })),
+        { speaker: "", text: getTransitionText(currentNode.id), kind: "system" }
+      ]
+    : [];
+  const currentResponseLine = responseLines[Math.min(responseLineIndex, Math.max(responseLines.length - 1, 0))];
+  const secondAskLines: VnLine[] = [
+    { speaker: "", text: "记忆校准完成。", kind: "system" },
+    { speaker: "", text: "你看到了 2024 年南京的夏天，她笑得很开心。", kind: "system" },
+    { speaker: "", text: "你看到了 2025 年毕业视频里，她说：你以后别什么都闷在心里了。", kind: "system" },
+    { speaker: "", text: "你看到了北京的南京大牌档，她一个人站在门口。", kind: "system" },
+    { speaker: "", text: "你也看到了 2026 年电话里，她说：要不我们先分开吧。", kind: "system" },
+    { speaker: "我", text: "好。", kind: "dialogue" },
+    { speaker: "", text: "你改变不了已经发生的事。你改变不了你们分开的结局。", kind: "system" },
+    { speaker: "", text: "但她明天去北京之前，确实等过你一句明确的话。", kind: "system" },
+    { speaker: "", text: "现在你已经看到了结局。即使这样，你仍然要回去吗？", kind: "system" }
+  ];
+  const currentSecondAskLine = secondAskLines[Math.min(secondAskLineIndex, secondAskLines.length - 1)];
+  const secondAskReady = secondAskLineIndex >= secondAskLines.length - 1;
   const introPackItems: IntroPackItem[] = ["laptop", "books", "folder", "calendar", "lamp", "keyboard", "mp3", "phone", "mouse", "cup", "scarf"];
   const introPackedCount = packedIntroItems.length;
   const introPackedDone = introPackedCount === introPackItems.length;
-  const introPhotoLines = [
-    "2027年6月。研究生毕业。",
-    "我在这间宿舍住了两年。现在要搬走了。",
-    "收拾东西的时候，翻到这张照片——2024年夏天。",
-    "南京的夏天很热，她的头发黏在脸上，但笑得很好看。",
-    "我坐在电脑前面，看了很久。",
-    "然后屏幕花了。"
+  const introPhotoLines: VnLine[] = [
+    { speaker: "我", text: "2027年6月。研究生毕业。", kind: "narration" },
+    { speaker: "我", text: "我在这间宿舍住了两年。现在要搬走了。", kind: "narration" },
+    { speaker: "我", text: "收拾东西的时候，翻到这张照片——2024年夏天。", kind: "narration" },
+    { speaker: "我", text: "南京的夏天很热，她的头发黏在脸上，但笑得很好看。", kind: "narration" },
+    { speaker: "我", text: "我坐在电脑前面，看了很久。", kind: "narration" },
+    { speaker: "我", text: "然后屏幕花了。", kind: "narration" },
+    { speaker: "", text: "电脑屏幕出现波纹。照片变成模糊的噪点。", kind: "system" },
+    { speaker: "", text: "慢慢清晰——但背景变了。", kind: "system" },
+    { speaker: "", text: "你现在看到的是 2024 年。你还要回去吗？", kind: "system" }
   ];
+  const currentIntroPhotoLine = introPhotoLines[Math.min(introPhotoLineIndex, introPhotoLines.length - 1)];
   const introPackLine = introPackedDone
     ? "东西都收进去了。桌上只剩下那张照片。"
-    : `旧书、文件夹和零碎的小东西还散在房间里。先把它们收进箱子。还剩 ${introPackItems.length - introPackedCount} 件。`;
+    : "旧书、文件夹和零碎的小东西还散在房间里。先把它们收进箱子。";
 
-  const roomHint = useMemo(() => {
-    if (!canSecondAsk) return `请查看四个记忆碎片：${seenMemories.length} / ${memories.length}`;
-    return "记忆校准完成。系统正在等待你的第二次选择。";
-  }, [canSecondAsk, seenMemories.length]);
+  useEffect(() => {
+    if (phase !== "intro" || introPhotoOpen) return;
+
+    setIntroPackNarrationVisible(true);
+    const timer = window.setTimeout(() => {
+      setIntroPackNarrationVisible(false);
+    }, 3000);
+
+    return () => window.clearTimeout(timer);
+  }, [introPhotoOpen, phase]);
 
   function openMemory(memory: Memory) {
     setOpenedMemory(memory);
@@ -530,13 +773,30 @@ export default function Home() {
     setSeenMemories((current) => (current.includes(id) ? current : [...current, id]));
   }
 
+  function openGuidedBeat() {
+    if (!guidedBeat) return;
+    const memory = memories.find((item) => item.id === guidedBeat.memoryId);
+    if (memory) {
+      setGuidePhoneOpen(false);
+      openMemory(memory);
+    }
+  }
+
+  function openGuidePhone() {
+    setGuidePhoneView("home");
+    setGuidePhoneOpen(true);
+  }
+
   function chooseNode(choice: StoryChoice) {
     setActiveChoice(choice);
+    setResponseLineIndex(0);
     setNodeChoices((current) => ({ ...current, [currentNode.id]: choice.key }));
   }
 
   function continueNode() {
     setActiveChoice(null);
+    setVnLineIndex(0);
+    setResponseLineIndex(0);
     if (nodeIndex < nodes.length - 1) {
       setNodeIndex((index) => index + 1);
       return;
@@ -567,27 +827,36 @@ export default function Home() {
     setNodeIndex(0);
     setNodeChoices({});
     setActiveChoice(null);
+    setVnLineIndex(0);
+    setResponseLineIndex(0);
+    setSecondAskLineIndex(0);
+    setGuidePhoneOpen(false);
+    setGuidePhoneView("home");
     setFarewellChoice(null);
+  }
+
+  function advanceVnLine() {
+    setVnLineIndex((index) => Math.min(index + 1, nodeIntroLines.length - 1));
+  }
+
+  function advanceResponseLine() {
+    if (responseLineIndex < responseLines.length - 1) {
+      setResponseLineIndex((index) => index + 1);
+      return;
+    }
+    continueNode();
+  }
+
+  function advanceSecondAskLine() {
+    setSecondAskLineIndex((index) => Math.min(index + 1, secondAskLines.length - 1));
   }
 
   return (
     <main className="app">
-      <section className="hero">
-        <div>
-          <p className="eyebrow">南京版互动叙事原型</p>
-          <h1>离别</h1>
-          <p>如果结局注定是分开，你还愿不愿意认真过在一起的每一分每一秒？</p>
-        </div>
-        <div className="status">
-          <span>{phase === "room" ? roomHint : "2027 年 6 月，南京某高校研究生宿舍"}</span>
-          <i><b style={{ width: `${progress}%` }} /></i>
-        </div>
-      </section>
-
       <section className="storyController" aria-label="剧情控制器">
         <div>
           <p className="eyebrow">剧情控制器</p>
-          <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "残留记忆" : phase === "nodes" ? currentNode.title : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾旁白" : "系统确认"}</strong>
+          <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "残留记忆" : phase === "nodes" ? currentNode.title : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾" : "确认"}</strong>
           <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `记忆碎片 ${seenMemories.length} / ${memories.length}` : "剧情进行中"}</span>
         </div>
         <div className="controllerActions">
@@ -627,10 +896,9 @@ export default function Home() {
                   <button className={cx("packItem spritePack introScarf", packedIntroItems.includes("scarf") && "packed")} onClick={() => packIntroItem("scarf")} type="button" aria-label="把围巾放进箱子"><img src="/assets/items/cable.png" alt="" draggable={false} /></button>
                 </div>
                 <button className={cx("packItem spritePack introCalendarLoose", packedIntroItems.includes("calendar") && "packed")} onClick={() => packIntroItem("calendar")} type="button" aria-label="把日历放进箱子"><img src="/assets/items/calendar.png" alt="" draggable={false} /></button>
-                <div className="introBox">
-                  <b>毕业</b>
-                  <span>{introPackedCount} / {introPackItems.length}</span>
-                  <small>点击物品收进箱子</small>
+                <div className={cx("introStorageBox", introPackedCount > 0 && "hasItems", introPackedDone && "full")} aria-label={`已收进 ${introPackedCount} 件物品`} role="status">
+                  <span />
+                  <b>{introPackedCount}/{introPackItems.length}</b>
                 </div>
                 {introPackedDone && <button
                   className={cx("introPhoto", introPackedDone && "revealed")}
@@ -645,39 +913,35 @@ export default function Home() {
                   <span>2024 夏</span>
                 </button>}
               </div>
-              <article className="visualNovelBox introDialogue">
-                <div className="speakerName">旁白</div>
-                <p>{introPackedDone ? "研究生宿舍的房间里，箱子已经合上了一半。" : "研究生宿舍的房间里，箱子摊在地上。"}</p>
-                <p>{introPackLine}</p>
-                <span>{introPackedDone ? "双击照片" : "点击物品收拾"}</span>
-              </article>
+              {introPackNarrationVisible && (
+                <article className="visualNovelBox introDialogue">
+                  <p>{introPackedDone ? "研究生宿舍的房间里，箱子已经合上了一半。" : "研究生宿舍的房间里，箱子摊在地上。"}</p>
+                  <p>{introPackLine}</p>
+                  <span>{introPackedDone ? "双击照片" : "点击物品收拾"}</span>
+                </article>
+              )}
             </div>
           ) : (
             <article className="storyCard introScreen">
               <p className="eyebrow">开场画面 / 第一次问</p>
-              <div className={cx("fullscreenPhoto", introPhotoLineIndex === introPhotoLines.length - 1 && "distorting")} aria-hidden="true">
+              <div className={cx("fullscreenPhoto", introPhotoLineIndex >= 5 && "distorting")} aria-hidden="true">
                 <img className="memoryPhotoImage" src="/assets/story/summer-2024-couple-photo.png" alt="" draggable={false} />
                 <span className="photoNoise" />
               </div>
-              <button className="visualNovelBox photoDialogue" onClick={advanceIntroPhotoLine} onKeyDown={(event) => {
+              <button className={cx("visualNovelBox photoDialogue", !speakerLabel(currentIntroPhotoLine.speaker) && "noSpeaker", currentIntroPhotoLine.kind === "system" && "systemLine")} onClick={advanceIntroPhotoLine} onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
                   advanceIntroPhotoLine();
                 }
               }} type="button">
-                <span className="speakerName">我</span>
-                <p>{introPhotoLines[introPhotoLineIndex]}</p>
-                <i>{introPhotoLineIndex < introPhotoLines.length - 1 ? "点击继续" : "画面开始失真"}</i>
+                {speakerLabel(currentIntroPhotoLine.speaker) && <span className="speakerName">{speakerLabel(currentIntroPhotoLine.speaker)}</span>}
+                <p>{currentIntroPhotoLine.text}</p>
+                <i>{introPhotoLineIndex < introPhotoLines.length - 1 ? "点击继续" : "请选择回应"}</i>
               </button>
               {introPhotoLineIndex === introPhotoLines.length - 1 && (
-                <>
-                  <div className="systemBox">
-                    <p>电脑屏幕出现波纹。照片变成模糊的噪点。</p>
-                    <p>慢慢清晰——但背景变了。</p>
-                    <strong>你现在看到的是 2024 年。你还要回去吗？</strong>
-                  </div>
-                  <button onClick={() => setPhase("room")} type="button">是。查看残留记忆</button>
-                </>
+                <div className="introChoiceLayer">
+                  <button onClick={() => setPhase("room")} type="button">是。等手机亮起来</button>
+                </div>
               )}
             </article>
           )}
@@ -686,7 +950,7 @@ export default function Home() {
 
       {phase === "room" && (
         <>
-          <section className="room pixelRoom">
+          <section className="room pixelRoom guidedRoom" aria-label="2027 年宿舍，手机消息推动主线">
             <div className="wallGlow" aria-hidden="true" />
             <div className="roomDepth" aria-hidden="true" />
             <div className="bookcase" aria-hidden="true">
@@ -698,78 +962,214 @@ export default function Home() {
               <span className="pinNote">北京—南京<br />1078 公里</span>
               <span className="pinPhoto">2024 秋</span>
             </div>
-            <button className="window item hasSprite" onClick={() => openMemory(memories[0])} aria-label="窗外梧桐">
+            <button className="window item hasSprite" disabled type="button" aria-label="窗外梧桐">
               <img className="itemSprite" src="/assets/items/window-night.png" alt="" draggable={false} />
               <span>梧桐树影</span>
             </button>
-            <button className="calendar item hasSprite storyCalendar" onClick={() => openMemory(memories[1])} aria-label="2024 年日历">
+            <button className="calendar item hasSprite storyCalendar" disabled type="button" aria-label="2024 年日历">
               <img className="itemSprite" src="/assets/items/calendar.png" alt="" draggable={false} />
             </button>
             <div className="box pixelBox">毕业</div>
             <div className="desk">
-              <button className={cx("monitor item hasSprite memoryItem", seenMemories.includes("computer") && "seen")} onClick={() => openMemory(memories[0])} type="button" aria-label="旧笔记本电脑">
+              <button className={cx("monitor item hasSprite memoryItem", seenMemories.includes("computer") && "seen")} disabled type="button" aria-label="旧笔记本电脑">
                 <img className="itemSprite" src="/assets/items/monitor.png" alt="" draggable={false} />
                 <span>旧笔记本</span>
               </button>
-              <button className="keyboard item hasSprite" onClick={() => openMemory(memories[0])} aria-label="键盘" type="button">
+              <button className="keyboard item hasSprite" disabled aria-label="键盘" type="button">
                 <img className="itemSprite" src="/assets/items/keyboard.png" alt="" draggable={false} />
               </button>
-              <button className="mouse item hasSprite" onClick={() => openMemory(memories[0])} aria-label="鼠标" type="button">
+              <button className="mouse item hasSprite" disabled aria-label="鼠标" type="button">
                 <img className="itemSprite" src="/assets/items/mouse.png" alt="" draggable={false} />
               </button>
-              <button className={cx("phone item hasSprite memoryItem", seenMemories.includes("phone") && "seen")} onClick={() => openMemory(memories[1])} type="button" aria-label="手机">
+              <button className={cx("phone item hasSprite memoryItem guidePhoneItem", !guidePhoneOpen && "phoneVibrating", seenMemories.includes("phone") && "seen")} onClick={openGuidePhone} type="button" aria-label="手机正在震动，查看微信">
                 <img className="itemSprite" src="/assets/items/phone.png" alt="" draggable={false} />
                 <span>手机</span>
               </button>
-              <button className={cx("mp3 item hasSprite memoryItem", seenMemories.includes("mp3") && "seen")} onClick={() => openMemory(memories[2])} type="button" aria-label="银色 MP3">
+              <button className={cx("mp3 item hasSprite memoryItem", seenMemories.includes("mp3") && "seen")} disabled type="button" aria-label="银色 MP3">
                 <img className="itemSprite" src="/assets/items/mp3.png" alt="" draggable={false} />
                 <span>银色 MP3</span>
               </button>
-              <button className="lamp item hasSprite" onClick={() => openMemory(memories[2])} aria-label="台灯" type="button">
+              <button className="lamp item hasSprite" disabled aria-label="台灯" type="button">
                 <img className="itemSprite" src="/assets/items/lamp.png" alt="" draggable={false} />
               </button>
-              <button className={cx("recycle storyRecycle item memoryItem", seenMemories.includes("recycle") && "seen")} onClick={() => openMemory(memories[3])} type="button" aria-label="回收站">
+              <button className={cx("recycle storyRecycle item memoryItem", seenMemories.includes("recycle") && "seen")} disabled type="button" aria-label="回收站">
                 <span>回收站</span>
               </button>
             </div>
-            <button className="slippers item hasSprite" onClick={() => openMemory(memories[1])} aria-label="拖鞋" type="button">
+            <button className="slippers item hasSprite" disabled aria-label="拖鞋" type="button">
               <img className="itemSprite" src="/assets/items/slippers.png" alt="" draggable={false} />
             </button>
-            <button className="trash item hasSprite" onClick={() => openMemory(memories[3])} aria-label="纸箱旁的垃圾桶" type="button">
+            <button className="trash item hasSprite" disabled aria-label="纸箱旁的垃圾桶" type="button">
               <img className="itemSprite" src="/assets/items/trash.png" alt="" draggable={false} />
             </button>
-          </section>
 
-          <section className="memoryDock" aria-label="记忆校准进度">
-            {memories.map((memory) => (
-              <button className={seenMemories.includes(memory.id) ? "done" : ""} onClick={() => openMemory(memory)} key={memory.id} type="button">
-                <b>{memory.title}</b>
-                <span>{memory.summary}</span>
+            {!guidePhoneOpen && (
+              <button className="phoneVibeHint" onClick={openGuidePhone} type="button">
+                <b>嗡——</b>
+                <span>手机亮了一下</span>
               </button>
-            ))}
+            )}
           </section>
 
-          {canSecondAsk && (
-            <div className="floatingAction">
-              <button onClick={() => setPhase("secondAsk")} type="button">全部看完了。继续</button>
+          {guidePhoneOpen && (
+            <div className="guidedPhoneBackdrop" onClick={() => setGuidePhoneOpen(false)}>
+              <article className="mainlinePhone guidedPhoneScreenOnly" aria-label="周也发来的消息" onClick={(event) => event.stopPropagation()}>
+              {guidePhoneView === "home" ? (
+                <div className="phoneHomeScreen">
+                  <div className="phoneHomeStatus">
+                    <span>{guidedBeat?.time ?? "00:16"}</span>
+                    <b>100%</b>
+                  </div>
+                  <button className="homeNotification" onClick={() => setGuidePhoneView("wechatList")} type="button">
+                    <img src="/assets/phone-apps/wechat.png" alt="" draggable={false} />
+                    <span>
+                      <b>微信</b>
+                      <strong>{guidedBeat?.title ?? "周也"}</strong>
+                      <small>{guidedBeat ? "发来一条新消息" : "发来一条消息"}</small>
+                    </span>
+                    <em>{guidedBeat?.time ?? "现在"}</em>
+                  </button>
+                  <div className="phoneAppGrid" aria-label="手机桌面">
+                    <button className="phoneAppButton unread" onClick={() => setGuidePhoneView("wechatList")} type="button">
+                      <img src="/assets/phone-apps/wechat.png" alt="" draggable={false} />
+                      <span>微信</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <img src="/assets/phone-apps/netease.png" alt="" draggable={false} />
+                      <span>网易云</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <i className="phoneIcon phoneIconCall" />
+                      <span>电话</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <i className="phoneIcon phoneIconContacts" />
+                      <span>联系人</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <img src="/assets/phone-apps/album.png" alt="" draggable={false} />
+                      <span>相册</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <img src="/assets/phone-apps/calendar.png" alt="" draggable={false} />
+                      <span>日历</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <img src="/assets/phone-apps/douyin.png" alt="" draggable={false} />
+                      <span>抖音</span>
+                    </button>
+                    <button className="phoneAppButton" type="button">
+                      <img src="/assets/phone-apps/weibo.png" alt="" draggable={false} />
+                      <span>微博</span>
+                    </button>
+                  </div>
+                </div>
+              ) : guidePhoneView === "wechatList" ? (
+                <div className="wechatListScreen">
+                  <div className="mainlinePhoneTop wechatListTop">
+                    <span>{guidedBeat?.time ?? "00:16"}</span>
+                    <b>微信</b>
+                  </div>
+                  <div className="wechatSearchBar">搜索</div>
+                  <button className="wechatThread unread" onClick={() => setGuidePhoneView("chat")} type="button">
+                    <i>周</i>
+                    <span>
+                      <strong>{guidedBeat?.title ?? "周也"}</strong>
+                      <small>{guidedBeat ? guidedBeat.message : "现在你已经看到了结局。要不要仍然回到 2024 年？"}</small>
+                    </span>
+                    <em>{guidedBeat?.time ?? "00:16"}</em>
+                  </button>
+                  <div className="wechatEmptyThreads" aria-hidden="true">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <nav className="wechatTabBar" aria-label="微信底部导航">
+                    <b>微信</b>
+                    <span>通讯录</span>
+                    <span>发现</span>
+                    <span>我</span>
+                  </nav>
+                </div>
+              ) : (
+                <>
+                  <div className="mainlinePhoneTop">
+                    <span>{guidedBeat?.time ?? "00:16"}</span>
+                    <b>微信</b>
+                  </div>
+                  <div className="mainlineChatHeader">
+                    <i>周</i>
+                    <div>
+                      <strong>{guidedBeat?.title ?? "周也"}</strong>
+                      <span>{guidedBeat ? `${guidedBeat.time} 发来一条消息` : "消息已读"}</span>
+                    </div>
+                  </div>
+                  <div className="mainlineMessages">
+                    {guidedBeats.slice(0, seenMemories.length).map((beat) => (
+                      <p className="readMessage" key={beat.memoryId}>{beat.after}</p>
+                    ))}
+                    {guidedBeat ? (
+                      <p className="newMessage">{guidedBeat.message}</p>
+                    ) : (
+                      <p className="newMessage">现在你已经看到了结局。要不要仍然回到 2024 年，把那些没说出口的话说完？</p>
+                    )}
+                  </div>
+                  <div className="mainlineProgress">
+                    {guidedBeats.map((beat, index) => (
+                      <span className={index < seenMemories.length ? "done" : index === seenMemories.length ? "active" : ""} key={beat.memoryId} />
+                    ))}
+                  </div>
+                  {guidedBeat ? (
+                    <button onClick={openGuidedBeat} type="button">{guidedBeat.cta}</button>
+                  ) : (
+                    <button onClick={() => {
+                      setGuidePhoneOpen(false);
+                      setGuidePhoneView("home");
+                      setSecondAskLineIndex(0);
+                      setPhase("secondAsk");
+                    }} type="button">继续。第二次选择</button>
+                  )}
+                </>
+              )}
+              </article>
             </div>
           )}
         </>
       )}
 
       {phase === "secondAsk" && (
-        <section className="curtain">
-          <article className="storyCard wide">
-            <p className="eyebrow">第二次问 / 知情选择</p>
-            <h2>现在你已经看到了结局。</h2>
-            <p>2024 年南京的夏天，她笑得很开心。2025 年北京的南京大牌档，她一个人站在门口。2026 年电话里，她说“要不我们先分开吧”。你说了“好”。</p>
-            <div className="systemBox">
-              <p>你改变不了已经发生的事。</p>
-              <p>你知道那些话救不了这段关系。</p>
-              <p>你也知道重新经历这些，只会让你再失去她一次。</p>
-              <strong>即使这样，你仍然要回去吗？</strong>
+        <section className="secondAskStage">
+          <article className="secondAskScene">
+            <div className="secondAskNoise" />
+            <div className="secondAskMemoryStrip">
+              <span>2024 南京夏天</span>
+              <span>2025 毕业.mp4</span>
+              <span>北京 南京大牌档</span>
+              <span>2026 分手电话</span>
             </div>
-            <button onClick={() => setPhase("nodes")} type="button">是。正式启动</button>
+            {secondAskReady && (
+              <div className="vnChoiceLayer secondAskChoice">
+                <button onClick={() => {
+                  setVnLineIndex(0);
+                  setResponseLineIndex(0);
+                  setPhase("nodes");
+                }} type="button">
+                  <i>A</i>
+                  <span>是。正式启动。</span>
+                </button>
+              </div>
+            )}
+            <button
+              className={cx("vnDialogueBox secondAskDialogue", !speakerLabel(currentSecondAskLine.speaker) && "noSpeaker", currentSecondAskLine.kind === "system" && "systemLine", currentSecondAskLine.speaker === "我" && "meLine")}
+              onClick={() => {
+                if (!secondAskReady) advanceSecondAskLine();
+              }}
+              type="button"
+            >
+              {speakerLabel(currentSecondAskLine.speaker) && <span className="speakerName">{speakerLabel(currentSecondAskLine.speaker)}</span>}
+              <p>{currentSecondAskLine.text}</p>
+              <i>{secondAskReady ? "请选择回应" : "点击继续"}</i>
+            </button>
           </article>
         </section>
       )}
@@ -784,6 +1184,8 @@ export default function Home() {
                 onClick={() => {
                   setNodeIndex(index);
                   setActiveChoice(null);
+                  setVnLineIndex(0);
+                  setResponseLineIndex(0);
                 }}
                 key={node.id}
                 type="button"
@@ -793,27 +1195,16 @@ export default function Home() {
               </button>
             ))}
           </div>
-          <article className="nodeCard">
+          <article className="nodeCard vnNodeCard">
             <SceneVisual node={currentNode} activeChoice={activeChoice} />
-            <div className="nodeScript">
-              <p className="eyebrow">{currentNode.eyebrow}</p>
-              <h2>{currentNode.title}</h2>
-              <p className="scene">{currentNode.scene}</p>
-              <div className="dialogue">
-                {currentNode.prompt.map((line) => <p key={line}>{line}</p>)}
+            <div className="vnSceneHud">
+              <div className="vnSceneTitle">
+                <span>{currentNode.eyebrow}</span>
+                <strong>{currentNode.title}</strong>
               </div>
-              {currentNode.system && <div className="systemBox compact">{currentNode.system}</div>}
 
-              {!activeChoice && (
-                <div className="silenceMeter">
-                  <span>沉默</span>
-                  <i />
-                  <small>{currentNode.id === "plane" ? "风停住了。她在等。" : currentNode.id === "station" ? "广播第二次响起。你还有三句话的时间。" : "她低头拧开水瓶，声音在安静里很响。"}</small>
-                </div>
-              )}
-
-              {!activeChoice ? (
-                <div className="choiceGrid">
+              {!activeChoice && choicesReady && (
+                <div className="vnChoiceLayer">
                   {currentNode.choices.map((choice) => (
                     <button onClick={() => chooseNode(choice)} key={choice.key} type="button">
                       <i>{choice.key}</i>
@@ -821,16 +1212,28 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-              ) : (
-                <div className="responsePanel">
-                  <p className="eyebrow">你选择了 {activeChoice.key}</p>
-                  {activeChoice.response.map((line) => <p key={line}>{line}</p>)}
-                  <hr />
-                  {currentNode.closing.map((line) => <p key={line}>{line}</p>)}
-                  <div className="transitionLine">{getTransitionText(currentNode.id)}</div>
-                  <button onClick={continueNode} type="button">{nodeIndex < nodes.length - 1 ? "切换到下一个场景" : "回到 2027 宿舍"}</button>
-                </div>
               )}
+
+              <button
+                className={cx(
+                  "vnDialogueBox",
+                  !speakerLabel(activeChoice ? currentResponseLine?.speaker : currentVnLine.speaker) && "noSpeaker",
+                  (activeChoice ? currentResponseLine?.kind : currentVnLine.kind) === "system" && "systemLine",
+                  (activeChoice ? currentResponseLine?.speaker : currentVnLine.speaker) === "我" && "meLine"
+                )}
+                onClick={() => {
+                  if (activeChoice) {
+                    advanceResponseLine();
+                    return;
+                  }
+                  if (!choicesReady) advanceVnLine();
+                }}
+                type="button"
+              >
+                {speakerLabel(activeChoice ? currentResponseLine?.speaker : currentVnLine.speaker) && <span className="speakerName">{speakerLabel(activeChoice ? currentResponseLine?.speaker : currentVnLine.speaker)}</span>}
+                <p>{activeChoice ? currentResponseLine?.text : currentVnLine.text}</p>
+                <i>{activeChoice ? responseLineIndex < responseLines.length - 1 ? "点击继续" : nodeIndex < nodes.length - 1 ? "进入下一场景" : "回到 2027 宿舍" : choicesReady ? "请选择回应" : "点击继续"}</i>
+              </button>
             </div>
           </article>
         </section>
@@ -839,7 +1242,7 @@ export default function Home() {
       {phase === "system" && (
         <section className="curtain">
           <article className="storyCard wide">
-            <p className="eyebrow">系统揭示</p>
+            <p className="eyebrow">回声</p>
             <h2>你改变的从来不是结局。</h2>
             <div className="systemBox">
               <p>三个节点，你都走完了。</p>
@@ -941,6 +1344,8 @@ export default function Home() {
               <DesktopMemory memory={openedMemory} markSeen={() => markMemorySeen("computer")} />
             ) : openedMemory.id === "phone" ? (
               <PhoneMemory markSeen={() => markMemorySeen("phone")} />
+            ) : openedMemory.id === "recycle" ? (
+              <GraduationVideoMemory memory={openedMemory} onClose={() => setOpenedMemory(null)} />
             ) : (
               <>
                 <p className="eyebrow">{openedMemory.place}</p>
