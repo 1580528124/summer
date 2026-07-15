@@ -170,6 +170,12 @@ button:focus-visible {
   opacity: 0.42;
 }
 
+.controllerActions button.activeControllerAction {
+  border-color: rgba(143, 163, 106, 0.72);
+  color: #102018;
+  background: linear-gradient(180deg, #ecf7df, #b9d792);
+}
+
 .curtain,
 .nodeStage,
 .phoneFinal {
@@ -1712,7 +1718,9 @@ p {
 .fullscreenPhoto {
   position: relative;
   overflow: hidden;
-  height: clamp(280px, 44vw, 430px);
+  aspect-ratio: 1629 / 965;
+  height: auto;
+  max-height: clamp(280px, 44vw, 520px);
   margin: 0 0 22px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
@@ -1726,9 +1734,8 @@ p {
   z-index: 1;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  image-rendering: pixelated;
-  transform: scale(1.01);
+  object-fit: contain;
+  image-rendering: auto;
 }
 
 .fullscreenPhoto::before {
@@ -2684,6 +2691,320 @@ p {
   min-height: 58px;
   border-radius: 18px;
   font-size: 16px;
+}
+
+.memoryWechatStage {
+  width: min(1180px, 100%);
+  min-height: 680px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(340px, 1.18fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+.wechatMemoryBrief,
+.wechatMemoryPhone {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(18, 21, 28, 0.82);
+  box-shadow: var(--shadow);
+}
+
+.wechatMemoryBrief {
+  padding: clamp(22px, 3vw, 34px);
+  background:
+    linear-gradient(180deg, rgba(20, 24, 32, 0.92), rgba(14, 17, 23, 0.96)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 42px);
+}
+
+.wechatMemoryBrief h2 {
+  margin-bottom: 14px;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.wechatMemoryBrief > p {
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.wechatMemoryProgress {
+  display: grid;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.wechatMemoryProgress button {
+  min-height: 72px;
+  border: 1px solid rgba(245, 234, 220, 0.14);
+  border-radius: 8px;
+  padding: 12px 13px;
+  color: #efe4d6;
+  background: rgba(255, 255, 255, 0.055);
+  text-align: left;
+  cursor: pointer;
+}
+
+.wechatMemoryProgress button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.wechatMemoryProgress button.active {
+  border-color: rgba(216, 163, 95, 0.58);
+  background: rgba(216, 163, 95, 0.14);
+}
+
+.wechatMemoryProgress button.done {
+  border-color: rgba(143, 163, 106, 0.62);
+  background: rgba(143, 163, 106, 0.13);
+}
+
+.wechatMemoryProgress small,
+.wechatMemoryProgress span {
+  display: block;
+}
+
+.wechatMemoryProgress small {
+  color: #e7bd80;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.wechatMemoryProgress span {
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.wechatMemoryPhone {
+  position: relative;
+  overflow: hidden;
+  min-height: 680px;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto auto;
+  border-radius: 34px;
+  padding: 18px;
+  color: #1d261f;
+  background:
+    linear-gradient(180deg, rgba(231, 238, 230, 0.98), rgba(204, 218, 205, 0.98)),
+    #dce8dd;
+}
+
+.wechatMemoryPhone::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: 92px;
+  height: 20px;
+  border-radius: 0 0 16px 16px;
+  background: rgba(13, 17, 23, 0.9);
+  transform: translateX(-50%);
+}
+
+.wechatMemoryTop {
+  position: relative;
+  z-index: 1;
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: 72px 1fr 72px;
+  align-items: center;
+  color: rgba(28, 37, 31, 0.7);
+  font-size: 12px;
+}
+
+.wechatMemoryTop strong {
+  color: #172119;
+  text-align: center;
+  font-size: 16px;
+}
+
+.wechatMemoryTop span:last-child {
+  text-align: right;
+}
+
+.wechatChapterHeader {
+  margin: 8px 0 12px;
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.54);
+}
+
+.wechatChapterHeader small,
+.wechatChapterHeader b {
+  display: block;
+}
+
+.wechatChapterHeader small {
+  color: #6f8d68;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.wechatChapterHeader b {
+  margin-top: 4px;
+  color: #1b261f;
+  font-size: 18px;
+}
+
+.wechatChapterHeader p {
+  margin: 7px 0 0;
+  color: rgba(29, 38, 31, 0.66);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.wechatMemoryMessages {
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px 4px 16px;
+}
+
+.wechatBubble {
+  width: fit-content;
+  max-width: 78%;
+  border-radius: 16px 16px 16px 4px;
+  padding: 10px 12px;
+  color: #18231b;
+  background: #ffffff;
+  box-shadow: 0 8px 18px rgba(36, 48, 38, 0.09);
+}
+
+.wechatBubble.mine {
+  align-self: flex-end;
+  border-radius: 16px 16px 4px 16px;
+  background: #b9e47f;
+}
+
+.wechatBubble.system {
+  align-self: center;
+  max-width: 92%;
+  border: 1px solid rgba(111, 145, 168, 0.3);
+  border-radius: 12px;
+  color: #314456;
+  background: rgba(226, 237, 242, 0.84);
+  text-align: center;
+}
+
+.wechatBubble p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.62;
+}
+
+.wechatBubble em {
+  display: block;
+  margin-bottom: 5px;
+  color: rgba(49, 68, 86, 0.62);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.wechatChapterAfter {
+  margin: 2px 4px 12px;
+  border-left: 3px solid rgba(216, 163, 95, 0.72);
+  padding: 9px 12px;
+  color: rgba(29, 38, 31, 0.72);
+  background: rgba(255, 255, 255, 0.48);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.wechatAdvance {
+  min-height: 52px;
+  border: 0;
+  border-radius: 18px;
+  color: #102018;
+  background: linear-gradient(180deg, #ecf7df, #b9d792);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.memoryWechatRoom {
+  min-height: 660px;
+  margin-bottom: 14px;
+}
+
+.memoryWechatRoom::after {
+  background:
+    radial-gradient(circle at 62% 49%, rgba(111, 145, 168, 0.2), transparent 34%),
+    radial-gradient(circle at 78% 28%, rgba(216, 163, 95, 0.12), transparent 25%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.32), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.34));
+}
+
+.roomMemoryBrief {
+  position: absolute;
+  z-index: 8;
+  left: 26px;
+  top: 250px;
+  width: min(360px, calc(100% - 52px));
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.roomMemoryBrief h2 {
+  font-size: clamp(24px, 3vw, 34px);
+}
+
+.wechatRoomPrimary {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 16px;
+  border: 0;
+  border-radius: 14px;
+  color: #102018;
+  background: linear-gradient(180deg, #ecf7df, #b9d792);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.roomMemoryProgress {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.memoryPhoneHint {
+  left: auto;
+  right: 24%;
+  bottom: 382px;
+}
+
+.wechatMemoryBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(4, 6, 10, 0.66);
+  backdrop-filter: blur(10px);
+}
+
+.phoneFromRoom {
+  width: min(520px, calc(100vw - 36px));
+  height: min(760px, calc(100vh - 36px));
+}
+
+.wechatPhoneClose {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  color: #eff7ef;
+  background: rgba(13, 17, 23, 0.86);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .memoryDock {
