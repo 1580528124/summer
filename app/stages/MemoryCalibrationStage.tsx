@@ -68,7 +68,7 @@ export function MemoryCalibrationStage({ setSecondAskLineIndex, setPhase }: Prop
           <span className="pinPhoto">2024 秋</span>
         </div>
         <button className="window item hasSprite" disabled type="button" aria-label="窗外梧桐">
-          <img className="itemSprite" src="/assets/items/window-night.png" alt="" draggable={false} />
+          <img className="itemSprite" src="/assets/story/intro-night-window-wide.png" alt="" draggable={false} />
           <span>梧桐树影</span>
         </button>
         <button className="calendar item hasSprite storyCalendar" disabled type="button" aria-label="2024 年日历">
