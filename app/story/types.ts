@@ -2,7 +2,7 @@
 export type MemoryId = "computer" | "phone" | "mp3" | "recycle";
 export type NodeId = "stadium" | "plane" | "station";
 export type ChoiceKey = "A" | "B" | "C" | "D" | "E";
-export type PhoneApp = "home" | "wechat" | "zhouye" | "moments" | "album" | "calendar";
+export type PhoneApp = "home" | "wechat" | "zhouye" | "moments" | "album" | "calendar" | "netease" | "qq" | "douyin";
 export type DesktopApp = "folder" | "tickets" | "recycle" | "notes";
 export type IntroPackItem = "laptop" | "books" | "folder" | "calendar" | "lamp" | "keyboard" | "mp3" | "phone" | "mouse" | "cup" | "scarf";
 export type GuidePhoneView = "home" | "wechatList" | "chat";

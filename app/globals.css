@@ -2937,32 +2937,6 @@ p {
     linear-gradient(90deg, rgba(0, 0, 0, 0.32), transparent 22%, transparent 78%, rgba(0, 0, 0, 0.34));
 }
 
-.roomMemoryBrief {
-  position: absolute;
-  z-index: 8;
-  left: 26px;
-  top: 250px;
-  width: min(360px, calc(100% - 52px));
-  padding: 20px;
-  backdrop-filter: blur(10px);
-}
-
-.roomMemoryBrief h2 {
-  font-size: clamp(24px, 3vw, 34px);
-}
-
-.wechatRoomPrimary {
-  width: 100%;
-  min-height: 46px;
-  margin-top: 16px;
-  border: 0;
-  border-radius: 14px;
-  color: #102018;
-  background: linear-gradient(180deg, #ecf7df, #b9d792);
-  font-weight: 900;
-  cursor: pointer;
-}
-
 .roomMemoryProgress {
   width: min(1180px, 100%);
   margin: 0 auto;
@@ -5544,6 +5518,589 @@ p {
 
 .phoneMemoryText p {
   max-width: 440px;
+}
+
+/* Realistic phone memory shell */
+.phoneFrame {
+  position: relative;
+  border: 10px solid #0a0b10;
+  border-radius: 46px;
+  background: #0a0b10;
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.1),
+    inset 0 0 0 5px rgba(255, 255, 255, 0.03),
+    0 28px 70px rgba(0, 0, 0, 0.48);
+}
+
+.phoneHardware {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  z-index: 5;
+  width: 96px;
+  height: 25px;
+  border-radius: 0 0 18px 18px;
+  background: #05060a;
+  transform: translateX(-50%);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.phoneHardware::after {
+  content: "";
+  position: absolute;
+  right: 19px;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #151b25;
+  box-shadow: 0 0 0 2px #0d1017;
+}
+
+.phoneScreen {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+  border-radius: 34px;
+  background:
+    linear-gradient(180deg, rgba(9, 15, 25, 0.1), rgba(9, 15, 25, 0.34)),
+    url("/assets/dragon-wallpaper.png") center / cover no-repeat,
+    linear-gradient(160deg, #23444d, #2e4d37 52%, #171b20);
+}
+
+.phoneStatus {
+  position: relative;
+  z-index: 4;
+  height: 44px;
+  padding: 12px 24px 0;
+  color: #fff;
+  background: transparent;
+  text-shadow: 0 1px 7px rgba(0, 0, 0, 0.5);
+}
+
+.lightPhoneStatus {
+  color: #1d241f;
+  text-shadow: none;
+}
+
+.statusPills {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.statusPills i {
+  width: 16px;
+  height: 8px;
+  display: inline-block;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  box-shadow: inset 10px 0 currentColor;
+}
+
+.phoneHome {
+  position: relative;
+  min-height: calc(100% - 44px);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 16px 16px 22px;
+}
+
+.phoneWidget {
+  width: 100%;
+  min-height: 104px;
+  display: grid;
+  align-content: end;
+  gap: 3px;
+  padding: 14px 6px 18px;
+  color: white;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.52);
+}
+
+.phoneWidget small,
+.phoneWidget span {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.phoneWidget strong {
+  font-size: 38px;
+  line-height: 1;
+}
+
+.appGrid {
+  grid-template-columns: repeat(4, 1fr);
+  align-content: start;
+  gap: 17px 9px;
+}
+
+.phoneAppButton {
+  min-width: 0;
+  min-height: 72px;
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 6px;
+  border: 0;
+  padding: 0;
+  color: white;
+  background: transparent;
+  cursor: pointer;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+}
+
+.phoneAppButton b {
+  max-width: 62px;
+  overflow: hidden;
+  font-size: 11px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.realAppIcon {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fff, #d9dce1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+.realAppIcon img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.realAppIcon em {
+  position: absolute;
+  right: -5px;
+  top: -7px;
+  min-width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #f6f6f6;
+  border-radius: 999px;
+  color: white;
+  background: #f13d37;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.qqIcon {
+  color: white;
+  background: linear-gradient(180deg, #49b6ff, #1488e9);
+  font-size: 29px;
+  font-family: Arial, sans-serif;
+  font-weight: 900;
+}
+
+.qqIcon i {
+  font-style: normal;
+}
+
+.phoneDock {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  border-radius: 24px;
+  padding: 12px 14px 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(18px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.phoneDock .phoneAppButton b {
+  display: none;
+}
+
+.phoneAppView {
+  height: calc(100% - 44px);
+  min-height: 0;
+  padding: 0 14px 20px;
+  overflow: hidden;
+  color: #1f2922;
+  background: #ededed;
+}
+
+.phoneAppTop {
+  height: 42px;
+  margin: 0 -6px 8px;
+  color: #1f2922;
+}
+
+.phoneAppTop button {
+  color: inherit;
+  background: transparent;
+  font-size: 30px;
+}
+
+.darkPhoneTop {
+  color: #111;
+}
+
+.wechatAppView,
+.wechatChatApp {
+  background: #ededed;
+}
+
+.wechatListScreen {
+  position: relative;
+  height: calc(100% - 50px);
+  padding-bottom: 52px;
+}
+
+.wechatSearch {
+  height: 34px;
+  display: grid;
+  align-items: center;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #909090;
+  background: #f8f8f8;
+  font-size: 13px;
+}
+
+.wechatChatList {
+  display: grid;
+  margin: 0 -14px;
+  background: #fff;
+}
+
+.wechatRow {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 42px 1fr 44px;
+  gap: 10px;
+  align-items: center;
+  border: 0;
+  border-bottom: 1px solid #eeeeee;
+  padding: 9px 12px;
+  color: #222;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wechatRow span,
+.wechatRow b,
+.wechatRow small,
+.wechatRow em {
+  min-width: 0;
+  display: block;
+}
+
+.wechatRow b {
+  font-size: 14px;
+}
+
+.wechatRow small {
+  overflow: hidden;
+  margin-top: 4px;
+  color: #8a8a8a;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wechatRow em {
+  align-self: start;
+  color: #9b9b9b;
+  font-size: 11px;
+  font-style: normal;
+  text-align: right;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  color: white;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.zhouAvatar { background: linear-gradient(180deg, #71a76b, #447c45); }
+.friendAvatar { background: linear-gradient(180deg, #e0a45b, #b86e42); }
+.groupAvatar { background: linear-gradient(180deg, #6ca4c9, #3b6f9b); }
+.fileAvatar { background: linear-gradient(180deg, #8f9aa6, #636d78); }
+
+.wechatTabs {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  height: 52px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  align-items: center;
+  border-top: 1px solid #e2e2e2;
+  color: #777;
+  background: #f8f8f8;
+  font-size: 11px;
+  text-align: center;
+}
+
+.wechatTabs b {
+  color: #20b05b;
+}
+
+.wechatConversationScreen {
+  height: calc(100% - 88px);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 -8px;
+  padding: 4px 6px 16px;
+}
+
+.chatDate {
+  align-self: center;
+  border-radius: 4px;
+  padding: 3px 7px;
+  color: white;
+  background: rgba(0, 0, 0, 0.18);
+  font-size: 10px;
+}
+
+.bubble {
+  max-width: 78%;
+  margin: 0;
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: #111;
+  background: #fff;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.bubble.theirs {
+  align-self: flex-start;
+}
+
+.bubble.mine {
+  align-self: flex-end;
+  background: #95ec69;
+}
+
+.imageBubble {
+  min-height: 78px;
+  display: grid;
+  align-content: end;
+  color: white;
+  background:
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.64)),
+    url("/assets/story/postcard-wutong-avenue.png") center / cover no-repeat;
+}
+
+.systemBubble {
+  align-self: center;
+  max-width: 88%;
+  color: #777;
+  background: transparent;
+  text-align: center;
+}
+
+.wechatInputBar {
+  height: 44px;
+  display: grid;
+  grid-template-columns: 30px 1fr 30px;
+  gap: 6px;
+  align-items: center;
+  margin: 0 -14px -4px;
+  padding: 7px 10px;
+  background: #f7f7f7;
+}
+
+.wechatInputBar span,
+.wechatInputBar b {
+  min-height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  color: #555;
+  background: white;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.albumAppView,
+.calendarAppView,
+.socialAppView {
+  background: #f6f4ef;
+}
+
+.musicAppView {
+  color: white;
+  background: linear-gradient(180deg, #d33a31, #1f1f22);
+}
+
+.musicPlayerMock {
+  height: calc(100% - 54px);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.musicPlayerMock img {
+  width: 118px;
+  height: 118px;
+  border-radius: 22px;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.32);
+}
+
+.musicPlayerMock strong {
+  margin-top: 8px;
+  font-size: 20px;
+}
+
+.musicPlayerMock i {
+  width: 210px;
+  height: 4px;
+  margin: 14px 0 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, white 42%, rgba(255, 255, 255, 0.26) 42%);
+}
+
+.qqAppView {
+  background: linear-gradient(180deg, #e8f6ff, #f8fbff);
+}
+
+.qqList {
+  display: grid;
+  gap: 10px;
+}
+
+.qqList button {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 42px 1fr;
+  gap: 10px;
+  border: 0;
+  border-radius: 12px;
+  padding: 10px;
+  color: #1c2a36;
+  background: white;
+  text-align: left;
+}
+
+.qqList i {
+  grid-row: span 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: #2ca7f8;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.qqList span {
+  color: #667684;
+  font-size: 12px;
+}
+
+.douyinAppView {
+  color: white;
+  background: #050507;
+}
+
+.musicAppView .phoneAppTop,
+.douyinAppView .phoneAppTop {
+  color: white;
+}
+
+.douyinMock {
+  height: calc(100% - 54px);
+  display: grid;
+  align-content: end;
+  gap: 6px;
+  padding: 0 4px 34px;
+  background:
+    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.74)),
+    url("/assets/story/summer-2024-couple-photo.png") center / cover no-repeat;
+}
+
+.homeIndicator {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  z-index: 5;
+  width: 112px;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  transform: translateX(-50%);
+}
+
+.lightPhoneStatus ~ .homeIndicator {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.stagePhoneShell {
+  position: relative;
+  width: min(520px, calc(100vw - 36px));
+  max-height: calc(100vh - 36px);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  border: 1px solid rgba(245, 234, 220, 0.18);
+  border-radius: 8px;
+  padding: 18px;
+  background: rgba(15, 18, 24, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.stagePhoneMemory .phoneFrame {
+  width: min(342px, calc(100vw - 82px));
+}
+
+.stagePhoneChapter {
+  width: min(342px, calc(100vw - 82px));
+  border-left: 3px solid rgba(216, 163, 95, 0.72);
+  padding: 8px 12px;
+  color: rgba(245, 234, 220, 0.76);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.stagePhoneChapter small,
+.stagePhoneChapter b {
+  display: block;
+}
+
+.stagePhoneChapter small {
+  color: #e7bd80;
+  font-weight: 900;
+}
+
+.stagePhoneChapter p {
+  margin: 4px 0 0;
+  color: rgba(245, 234, 220, 0.68);
+  line-height: 1.45;
+}
+
+.stagePhoneAdvance {
+  width: min(342px, calc(100vw - 82px));
+  border-radius: 8px;
 }
 
 @media (max-width: 1040px) {
