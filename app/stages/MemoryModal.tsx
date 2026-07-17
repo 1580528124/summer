@@ -17,7 +17,7 @@ export function MemoryModal(props: Props) {
             {openedMemory.id === "computer" ? (
               <DesktopMemory memory={openedMemory} markSeen={() => markMemorySeen("computer")} />
             ) : openedMemory.id === "phone" ? (
-              <PhoneMemory markSeen={() => markMemorySeen("phone")} initialApp="zhouye" compact />
+              <PhoneMemory markSeen={() => markMemorySeen("phone")} initialApp="home" compact />
             ) : openedMemory.id === "recycle" ? (
               <GraduationVideoMemory memory={openedMemory} onClose={() => setOpenedMemory(null)} />
             ) : (

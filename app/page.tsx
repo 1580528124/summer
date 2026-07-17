@@ -10,8 +10,18 @@ import { NodesStage } from "./stages/NodesStage";
 import { SecondAskStage } from "./stages/SecondAskStage";
 import { SystemRevealStage } from "./stages/SystemRevealStage";
 import { guidedBeats, introMemories, memories, nodes } from "./story/data";
-import type { ChoiceKey, IntroPackItem, Memory, MemoryId, NodeId, Phase, StoryChoice, VnLine } from "./story/types";
+import type { ChoiceKey, IntroPackItem, Memory, MemoryId, NodeId, Phase, SchedulePresenceChoice, StoryChoice, VnLine } from "./story/types";
 import { getTransitionText, parseVnLine } from "./story/utils";
+
+const memoryCalibrationSteps = [
+  "2-1 电脑",
+  "2-2 消息：2024",
+  "2-3 语音",
+  "2-4 消息：offer",
+  "2-5 回收站",
+  "2-6 消息：7-12月",
+  "2-7 消息：通话"
+];
 
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("intro");
@@ -33,6 +43,8 @@ export default function Home() {
   const [guidePhoneOpen, setGuidePhoneOpen] = useState(false);
   const [guidePhoneView, setGuidePhoneView] = useState<"home" | "wechatList" | "chat">("home");
   const [farewellChoice, setFarewellChoice] = useState<string | null>(null);
+  const [schedulePresenceChoice, setSchedulePresenceChoice] = useState<SchedulePresenceChoice | null>(null);
+  const [memoryControllerJump, setMemoryControllerJump] = useState({ index: 0, nonce: 0 });
 
   const currentNode = nodes[nodeIndex];
   const planeChoice = nodeChoices.plane ?? "D";
@@ -192,6 +204,8 @@ export default function Home() {
     setGuidePhoneOpen(false);
     setGuidePhoneView("home");
     setFarewellChoice(null);
+    setSchedulePresenceChoice(null);
+    setMemoryControllerJump({ index: 0, nonce: 0 });
   }
 
   function advanceVnLine() {
@@ -225,6 +239,16 @@ export default function Home() {
     setGuidePhoneOpen(false);
     setGuidePhoneView("home");
     setSecondAskLineIndex(0);
+    setMemoryControllerJump((current) => ({ index: 0, nonce: current.nonce + 1 }));
+  }
+
+  function jumpToMemoryCalibrationStep(index: number) {
+    setPhase("room");
+    setOpenedMemory(null);
+    setGuidePhoneOpen(false);
+    setGuidePhoneView("home");
+    setSecondAskLineIndex(0);
+    setMemoryControllerJump((current) => ({ index, nonce: current.nonce + 1 }));
   }
 
   return (
@@ -233,11 +257,21 @@ export default function Home() {
         <div>
           <p className="eyebrow">剧情控制器</p>
           <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "记忆校准" : phase === "nodes" ? currentNode.title : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾" : "确认"}</strong>
-          <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `记忆碎片 ${seenMemories.length} / ${memories.length}` : "剧情进行中"}</span>
+          <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `当前节点 ${memoryControllerJump.index + 1} / ${memoryCalibrationSteps.length}` : "剧情进行中"}</span>
         </div>
         <div className="controllerActions">
           <button className={phase === "intro" ? "activeControllerAction" : ""} onClick={jumpToIntroStage} type="button">第一阶段</button>
           <button className={phase === "room" ? "activeControllerAction" : ""} onClick={jumpToMemoryCalibrationStage} type="button">第二阶段</button>
+          {memoryCalibrationSteps.map((label, index) => (
+            <button
+              className={phase === "room" && memoryControllerJump.index === index ? "activeControllerAction" : ""}
+              onClick={() => jumpToMemoryCalibrationStep(index)}
+              type="button"
+              key={label}
+            >
+              {label}
+            </button>
+          ))}
           {phase === "intro" && !introPhotoOpen && (
             <>
               <button onClick={() => setPackedIntroItems([])} type="button">重置收拾</button>
@@ -289,8 +323,13 @@ export default function Home() {
           setGuidePhoneView={setGuidePhoneView}
           openGuidedBeat={openGuidedBeat}
           getGuidedOptionText={getGuidedOptionText}
+          markMemorySeen={markMemorySeen}
+          schedulePresenceChoice={schedulePresenceChoice}
+          setSchedulePresenceChoice={setSchedulePresenceChoice}
           setSecondAskLineIndex={setSecondAskLineIndex}
           setPhase={setPhase}
+          controllerStepIndex={memoryControllerJump.index}
+          controllerJumpNonce={memoryControllerJump.nonce}
         />
       )}
 
@@ -302,6 +341,8 @@ export default function Home() {
           setVnLineIndex={setVnLineIndex}
           setResponseLineIndex={setResponseLineIndex}
           setPhase={setPhase}
+          schedulePresenceChoice={schedulePresenceChoice}
+          setSchedulePresenceChoice={setSchedulePresenceChoice}
         />
       )}
 
