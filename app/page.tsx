@@ -23,6 +23,13 @@ const memoryCalibrationSteps = [
   "2-7 消息：通话"
 ];
 
+const thirdStageSteps = [
+  "3-0 她来南京",
+  "3-1 操场看台",
+  "3-2 梧桐路",
+  "3-3 南京南站"
+];
+
 export default function Home() {
   const [phase, setPhase] = useState<Phase>("intro");
   const [introPhotoOpen, setIntroPhotoOpen] = useState(false);
@@ -66,15 +73,17 @@ export default function Home() {
     : [];
   const currentResponseLine = responseLines[Math.min(responseLineIndex, Math.max(responseLines.length - 1, 0))];
   const secondAskLines: VnLine[] = [
-    { speaker: "", text: "记忆校准完成。", kind: "system" },
-    { speaker: "", text: "你看到了 2024 年南京的夏天，她笑得很开心。", kind: "system" },
-    { speaker: "", text: "你看到了 2025 年毕业视频里，她说：你以后别什么都闷在心里了。", kind: "system" },
-    { speaker: "", text: "你看到了北京的南京大牌档，她一个人站在门口。", kind: "system" },
-    { speaker: "", text: "你也看到了 2026 年电话里，她说：要不我们先分开吧。", kind: "system" },
+    { speaker: "我", text: "我把聊天记录关掉了。", kind: "narration" },
+    { speaker: "我", text: "从头看到尾，我发现一件事。", kind: "narration" },
+    { speaker: "我", text: "每一次她靠近的时候，我都在往后退。", kind: "narration" },
+    { speaker: "我", text: "不是故意的。", kind: "narration" },
+    { speaker: "我", text: "是我以为退一步，是为了以后能更好地进一步。", kind: "narration" },
+    { speaker: "我", text: "但退着退着，就没有以后了。", kind: "narration" },
+    { speaker: "我", text: "她从头到尾都在说。我从头到尾都在退。", kind: "narration" },
+    { speaker: "我", text: "到最后退无可退了。", kind: "narration" },
     { speaker: "我", text: "好。", kind: "dialogue" },
-    { speaker: "", text: "你改变不了已经发生的事。你改变不了你们分开的结局。", kind: "system" },
-    { speaker: "", text: "但她明天去北京之前，确实等过你一句明确的话。", kind: "system" },
-    { speaker: "", text: "现在你已经看到了结局。即使这样，你仍然要回去吗？", kind: "system" }
+    { speaker: "我", text: "那时候我以为这是尊重她的决定。现在才知道，那是我又往后退了一步。", kind: "narration" },
+    { speaker: "", text: "客观事实不会改变。你们仍然会走到分开。但你可以重新说话。", kind: "system" }
   ];
   const currentSecondAskLine = secondAskLines[Math.min(secondAskLineIndex, secondAskLines.length - 1)];
   const secondAskReady = secondAskLineIndex >= secondAskLines.length - 1;
@@ -251,13 +260,30 @@ export default function Home() {
     setMemoryControllerJump((current) => ({ index, nonce: current.nonce + 1 }));
   }
 
+  function jumpToThirdStageStep(index: number) {
+    setOpenedMemory(null);
+    setGuidePhoneOpen(false);
+    setGuidePhoneView("home");
+    setActiveChoice(null);
+    setVnLineIndex(0);
+    setResponseLineIndex(0);
+    setSecondAskLineIndex(0);
+    setSchedulePresenceChoice(null);
+    if (index === 0) {
+      setPhase("secondAsk");
+      return;
+    }
+    setNodeIndex(index - 1);
+    setPhase("nodes");
+  }
+
   return (
     <main className="app">
       <section className="storyController" aria-label="剧情控制器">
         <div>
           <p className="eyebrow">剧情控制器</p>
-          <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "记忆校准" : phase === "nodes" ? currentNode.title : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾" : "确认"}</strong>
-          <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `当前节点 ${memoryControllerJump.index + 1} / ${memoryCalibrationSteps.length}` : "剧情进行中"}</span>
+          <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "记忆校准" : phase === "secondAsk" ? "第三阶段：她来南京" : phase === "nodes" ? `第三阶段：${currentNode.title}` : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾" : "确认"}</strong>
+          <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `当前节点 ${memoryControllerJump.index + 1} / ${memoryCalibrationSteps.length}` : phase === "secondAsk" ? "节点 0 / 3" : phase === "nodes" ? `节点 ${nodeIndex + 1} / ${nodes.length}` : "剧情进行中"}</span>
         </div>
         <div className="controllerActions">
           <button className={phase === "intro" ? "activeControllerAction" : ""} onClick={jumpToIntroStage} type="button">第一阶段</button>
@@ -266,6 +292,17 @@ export default function Home() {
             <button
               className={phase === "room" && memoryControllerJump.index === index ? "activeControllerAction" : ""}
               onClick={() => jumpToMemoryCalibrationStep(index)}
+              type="button"
+              key={label}
+            >
+              {label}
+            </button>
+          ))}
+          <button className={phase === "secondAsk" || phase === "nodes" ? "activeControllerAction" : ""} onClick={() => jumpToThirdStageStep(0)} type="button">第三阶段</button>
+          {thirdStageSteps.map((label, index) => (
+            <button
+              className={(phase === "secondAsk" && index === 0) || (phase === "nodes" && index === nodeIndex + 1) ? "activeControllerAction" : ""}
+              onClick={() => jumpToThirdStageStep(index)}
               type="button"
               key={label}
             >
