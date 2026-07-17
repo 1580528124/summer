@@ -303,6 +303,12 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   const [completedFragments, setCompletedFragments] = useState<StepId[]>([]);
   const [chapterIndex, setChapterIndex] = useState(0);
   const [activePhoneStep, setActivePhoneStep] = useState<PhoneStepId | null>(null);
+  const [phoneRevealCounts, setPhoneRevealCounts] = useState<Record<PhoneStepId, number>>({
+    phone0: 0,
+    phone1: 0,
+    phone2: 0,
+    phone3: 0
+  });
   const [phoneOpen, setPhoneOpen] = useState(false);
   const [failedCalibration, setFailedCalibration] = useState<string[]>([]);
   const [scheduleMessageArrived, setScheduleMessageArrived] = useState(false);
@@ -468,6 +474,13 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
     setPhoneOpen(false);
     setActivePhoneStep(null);
     setPhoneChapterComplete(false);
+  }
+
+  function updateActivePhoneRevealCount(count: number) {
+    if (!activePhoneStep) return;
+    setPhoneRevealCounts((current) => (
+      current[activePhoneStep] === count ? current : { ...current, [activePhoneStep]: count }
+    ));
   }
 
   function chooseFailedCalibration(key: string) {
@@ -785,6 +798,8 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
                 compact
                 stageMode
                 memoryChapter={chapterIndex}
+                savedMemoryRevealCount={activePhoneStep ? phoneRevealCounts[activePhoneStep] : 0}
+                onMemoryRevealCountChange={updateActivePhoneRevealCount}
                 onMemoryChapterCompleteChange={setPhoneChapterComplete}
                 memoryChapterCompleted={phoneChapterComplete}
                 memoryAdvanceLabel={activePhoneStep === "phone3" ? phoneDoneText : "收起手机，继续查看房间"}

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Fragment, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import type { LiveChatMessage, PhoneApp } from "../story/types";
@@ -12,6 +12,8 @@ type Props = {
   liveMessages?: LiveChatMessage[];
   liveTyping?: boolean;
   memoryChapter?: number;
+  savedMemoryRevealCount?: number;
+  onMemoryRevealCountChange?: (count: number) => void;
   onMemoryChapterCompleteChange?: (complete: boolean) => void;
   memoryChapterCompleted?: boolean;
   memoryAdvanceLabel?: string;
@@ -168,53 +170,71 @@ function WechatList({ openChat, activeTab, setActiveTab }: { openChat: () => voi
 
 const memoryConversations = [
   [
-    { type: "date", text: "第一阶段：2024年夏天-秋天" },
-    { type: "theirs", text: "[图片：小龙虾] 下次我们一起去！！！你剥虾我负责吃😋", image: true, imageSrc: "/assets/story/chat-crayfish-2024.png" },
+    { type: "date", text: "2024年3月5日" },
+    { type: "theirs", text: "[图片：小龙虾] 这个好吃下次我们一起去！！！", image: true, imageSrc: "/assets/story/chat-crayfish-2024.png" },
+    { type: "thiers", text: "你剥虾我负责吃😋" },
     { type: "mine", text: "我剥壳很慢的" },
     { type: "theirs", text: "没事，你剥一只我吃一只，你剥两只我吃两只，不耽误" },
-    { type: "mine", text: "行，那你得准备一打湿纸巾" },
-    { type: "theirs", text: "你带就行" },
-    { type: "theirs", text: "[图片：南京晚霞] 南京的晚霞有梧桐树衬着。北京的可能有高楼大厦吧。", image: true, imageSrc: "/assets/story/chat-nanjing-sunset-2024.png" },
-    { type: "mine", text: "那你以后拍给我看看" },
-    { type: "theirs", text: "你说的。到时候我发你你又不回。" },
-    { type: "mine", text: "我肯定回。晚霞配高楼，挺想看的。" },
-    { type: "theirs", text: "我们以后怎么办啊" },
+    { type: "mine", text: "哈哈哈哈哈哈那你得准备一打湿纸巾" },
+    { type: "theirs", text: "你带就行~" },
+    { type: "theirs", text: "好想回去看看啊" },
+    { type: "theirs", text: "这个是之前拍的" },
+    { type: "theirs", text: "[图片：南京晚霞] 南京的晚霞有梧桐树衬着。北京不知道夕阳配着高楼大厦是什么样。", image: true, imageSrc: "/assets/story/chat-nanjing-sunset-2024.png" },
+    { type: "mine", text: "那我以后多拍给你看看" },
+    { type: "theirs", text: "你说的喔" },
+    { type: "theirs", text: "到时候咱俩交换" },
+    { type: "mine", text: "晚霞配高楼，感觉一定很棒。" },
+    { type: "theirs", text: "这么远那我们以后怎么办啊" },
     { type: "mine", text: "再说吧" },
     { type: "theirs", text: "又是\"再说\"" },
     { type: "mine", text: "到时候肯定有办法的" },
-    { type: "theirs", text: "嗯。听你的" },
+    { type: "mine", text: "等我去北京读研就好啦" },
+    { type: "theirs", text: "嗯呢" },
+    { type: "theirs", text: "听你的" },
     { type: "mine", text: "你信我？" },
-    { type: "theirs", text: "不信。但先信着吧。" },
-    { type: "mine", text: "……谢谢你啊。" }
+    { type: "theirs", text: "不信嘿嘿" },
+    { type: "theirs", text: "但先信着吧" },
+    { type: "mine", text: "我谢谢你啊" }
   ],
   [
-    { type: "date", text: "第二阶段：2025年3月-6月" },
-    { type: "theirs", text: "[图片：offer截图] 我拿到啦！！！运营岗！！！北京！！！！", image: true, imageSrc: "/assets/story/offer-zhouye-2025.png" },
-    { type: "mine", text: "好耶！什么公司啊？工资多少？什么时候入职？" },
-    { type: "theirs", text: "你问得比我妈还细" },
-    { type: "mine", text: "废话，你妈又不用异地" },
-    { type: "theirs", text: "哎你这句话我截图了" },
-    { type: "mine", text: "别截图。我是认真的。" },
-    { type: "theirs", text: "知道啦。互联网中厂，税前12k，7月入职。" },
-    { type: "mine", text: "那你在北京比我富多了。请我吃饭。" },
-    { type: "theirs", text: "你来北京我就请你。你那个呢？出结果没？" },
-    { type: "mine", text: "没呢" },
-    { type: "theirs", text: "有消息跟我说。别自己扛。" },
-    { type: "mine", text: "嗯。" },
-    { type: "mine", text: "出结果了。本校，调剂。" },
-    { type: "theirs", text: "你之前不是说考北京吗？" },
-    { type: "mine", text: "没考上。" },
-    { type: "theirs", text: "你一直没跟我说？" },
-    { type: "mine", text: "怕你担心。" },
-    { type: "theirs", text: "你考本校怎么会担心啊。我就是……你之前一直在说北京，我以为你肯定要来。" },
-    { type: "mine", text: "我也以为。" },
-    { type: "theirs", text: "没事。南京也挺好的。我回来看你。" },
-    { type: "mine", text: "你工作那么忙，别老折腾。" },
-    { type: "theirs", text: "那你来看我。" },
-    { type: "mine", text: "我尽量。" },
-    { type: "theirs", text: "你尽量这句话，我记住了。到时候你没来我可要生气的。" },
-    { type: "mine", text: "那我到时候多带点零食来赔罪。" },
-    { type: "theirs", text: "我要吃卫龙。" }
+    { type: "date", text: "2025年4月16日" },
+    { type: "theirs", text: "[图片：offer截图] 我能转正啦！！！", image: true, imageSrc: "/assets/story/offer-zhouye-2025.png" },
+    { type: "theirs", text: "运营岗！！" },
+    { type: "mine", text: "好耶！" },
+    { type: "mine", text: "成功转正啦！" },
+    { type: "mine", text: "转正后工资多少哇" },
+    { type: "mine", text: "什么时候正式入职哈哈哈哈" },
+    { type: "theirs", text: "你问得比我妈还细宝宝" },
+    { type: "mine", text: "废话，阿姨见得次数比咱们俩多" },
+    { type: "mine", text: "再说了阿姨又不用异地恋" },
+    { type: "theirs", text: "哎！什么话！" },
+    { type: "theirs", text: "我可截图了啊" },
+    { type: "mine", text: "别别别" },
+    { type: "mine", text: "错了错了" },
+    { type: "theirs", text: "哈哈哈哈哈哈哈" },
+     { type: "theirs", text: "这个还行税前12k，等正式毕业就入职啦" },
+    { type: "mine", text: "前程似锦啊小宝" },
+    { type: "theirs", text: "你来北京咱俩吃饭！" },
+    { type: "theirs", text: "你那个结果怎么样呀？" },
+    { type: "theirs", text: "咱们是不是九月就可以北京见啦" },
+    { type: "mine", text: "啊" },
+    { type: "mine", text: "其实" },
+    { type: "theirs", text: "有消息跟我说啊 就算坏事也别自己扛" },
+    { type: "mine", text: "嗯嗯" },
+    { type: "mine", text: "差一点 要调剂回本校了" },
+    { type: "theirs", text: "是不是早就出了但你一直没跟我说宝宝" },
+    { type: "mine", text: "怕你担心" },
+    { type: "theirs", text: "调剂回本校怎么会担心啊。我就是……你之前一直在说北京，我以为你肯定要来。" },
+    { type: "theirs", text: "我们之前一直在说北京北京的，我以为你没问题的" },
+    { type: "mine", text: "我也以为" },
+    { type: "theirs", text: "没事儿 南京也挺好的 等我回来看你呀" },
+    { type: "mine", text: "你工作那么忙，别老折腾了" },
+    { type: "theirs", text: "那你来看我" },
+    { type: "mine", text: "如果不是很忙的话包去的" },
+    { type: "theirs", text: "你尽量这句话，我记住了。到时候你没来我可要生气的" },
+    { type: "mine", text: "那我到时候多带点零食来赔罪好不好" },
+    { type: "theirs", text: "我要吃辣条" },
+    { type: "theirs", text: "麻辣王子" }
   ],
   [
     { type: "date", text: "第三阶段：2025年7月-12月" },
@@ -436,14 +456,24 @@ function WechatConversation({
   liveMessages,
   liveTyping = false,
   memoryChapter = 0,
+  savedMemoryRevealCount = 0,
+  onMemoryRevealCountChange,
   onMemoryChapterCompleteChange,
   memoryChapterCompleted = false,
+  stageMode = false,
+  memoryAdvanceLabel,
+  onMemoryAdvance,
 }: {
   liveMessages?: LiveChatMessage[];
   liveTyping?: boolean;
   memoryChapter?: number;
+  savedMemoryRevealCount?: number;
+  onMemoryRevealCountChange?: (count: number) => void;
   onMemoryChapterCompleteChange?: (complete: boolean) => void;
   memoryChapterCompleted?: boolean;
+  stageMode?: boolean;
+  memoryAdvanceLabel?: string;
+  onMemoryAdvance?: () => void;
 }) {
   const conversationRef = useRef<HTMLDivElement>(null);
   const rawMemoryConversation = memoryConversations[Math.min(memoryChapter, memoryConversations.length - 1)];
@@ -456,7 +486,9 @@ function WechatConversation({
       ...(imageText.caption ? [{ type: message.type, text: imageText.caption }] : [])
     ];
   }), [rawMemoryConversation]);
-  const [memoryRevealCount, setMemoryRevealCount] = useState(memoryChapterCompleted ? currentMemoryConversation.length : 0);
+  const [memoryRevealCount, setMemoryRevealCount] = useState(
+    memoryChapterCompleted ? currentMemoryConversation.length : Math.min(savedMemoryRevealCount, currentMemoryConversation.length)
+  );
   const [enlargedImage, setEnlargedImage] = useState<{ src: string; label: string } | null>(null);
   const pendingMemoryMessage = currentMemoryConversation[memoryRevealCount];
   const waitingForHistoricalReply = !liveMessages && pendingMemoryMessage?.type === "mine";
@@ -468,8 +500,15 @@ function WechatConversation({
   }, [liveMessages, liveTyping]);
 
   useEffect(() => {
-    setMemoryRevealCount(memoryChapterCompleted ? currentMemoryConversation.length : 0);
-  }, [currentMemoryConversation.length, memoryChapter, memoryChapterCompleted]);
+    setMemoryRevealCount(
+      memoryChapterCompleted ? currentMemoryConversation.length : Math.min(savedMemoryRevealCount, currentMemoryConversation.length)
+    );
+  }, [currentMemoryConversation.length, memoryChapter, memoryChapterCompleted, savedMemoryRevealCount]);
+
+  useEffect(() => {
+    if (liveMessages) return;
+    onMemoryRevealCountChange?.(memoryRevealCount);
+  }, [liveMessages, memoryRevealCount, onMemoryRevealCountChange]);
 
   useEffect(() => {
     onMemoryChapterCompleteChange?.(memoryChapterComplete);
@@ -565,11 +604,22 @@ function WechatConversation({
           </>
         )}
       </div>
-      {waitingForHistoricalReply && (
-        <button className="historicalReplyButton" onClick={sendHistoricalReply} type="button">
-          <span>{pendingMemoryMessage.text}</span>
+      {stageMode && !liveMessages && memoryChapterCompleted && memoryAdvanceLabel && onMemoryAdvance && (
+        <button className="historicalNextButton" onClick={onMemoryAdvance} type="button">
+          {memoryAdvanceLabel}
         </button>
       )}
+      <div className="wechatInputBar">
+        <span>＋</span>
+        {waitingForHistoricalReply && pendingMemoryMessage ? (
+          <button className="wechatReplyInputButton" onClick={sendHistoricalReply} type="button">
+            {pendingMemoryMessage.text}
+          </button>
+        ) : (
+          <b>{stageMode && !liveMessages ? memoryChapterCompleted ? "这段旧对话已读完" : "等待当年的回复" : "说点什么"}</b>
+        )}
+        <span>☺</span>
+      </div>
       {enlargedImage && (
         <button className="chatImagePreviewOverlay" onClick={() => setEnlargedImage(null)} type="button" aria-label="关闭图片预览">
           <img src={enlargedImage.src} alt={enlargedImage.label} draggable={false} />
@@ -587,6 +637,8 @@ export function PhoneMemory({
   liveMessages,
   liveTyping,
   memoryChapter = 0,
+  savedMemoryRevealCount = 0,
+  onMemoryRevealCountChange,
   onMemoryChapterCompleteChange,
   memoryChapterCompleted = false,
   memoryAdvanceLabel,
@@ -644,19 +696,14 @@ export function PhoneMemory({
                 liveMessages={liveMessages}
                 liveTyping={liveTyping}
                 memoryChapter={memoryChapter}
+                savedMemoryRevealCount={savedMemoryRevealCount}
+                onMemoryRevealCountChange={onMemoryRevealCountChange}
                 onMemoryChapterCompleteChange={onMemoryChapterCompleteChange}
                 memoryChapterCompleted={memoryChapterCompleted}
+                stageMode={stageMode}
+                memoryAdvanceLabel={memoryAdvanceLabel}
+                onMemoryAdvance={onMemoryAdvance}
               />
-              {stageMode && !liveMessages && memoryChapterCompleted && memoryAdvanceLabel && onMemoryAdvance && (
-                <button className="historicalNextButton" onClick={onMemoryAdvance} type="button">
-                  {memoryAdvanceLabel}
-                </button>
-              )}
-              <div className="wechatInputBar">
-                <span>＋</span>
-                <b>{stageMode && !liveMessages ? memoryChapterCompleted ? "这段旧对话已读完" : "等待当年的回复" : "说点什么"}</b>
-                <span>☺</span>
-              </div>
             </div>
           )}
 
@@ -742,4 +789,3 @@ export function PhoneMemory({
     </div>
   );
 }
-

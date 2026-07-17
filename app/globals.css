@@ -5824,6 +5824,14 @@ p {
 .wechatMe {
   min-height: 0;
   max-height: none;
+  scrollbar-width: none;
+}
+
+.wechatChatList::-webkit-scrollbar,
+.wechatPanelList::-webkit-scrollbar,
+.wechatMe::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .wechatPanelList {
@@ -5980,6 +5988,7 @@ p {
 .wechatConversationScreen {
   height: calc(100% - 88px);
   overflow: auto;
+  scrollbar-width: none;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -5987,8 +5996,13 @@ p {
   padding: 4px 6px 16px;
 }
 
+.wechatConversationScreen::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
 .wechatConversationScreen.hasHistoricalReply {
-  height: calc(100% - 154px);
+  height: calc(100% - 88px);
 }
 
 .chatDate {
@@ -6001,6 +6015,7 @@ p {
 }
 
 .bubble {
+  width: fit-content;
   max-width: 78%;
   margin: 0;
   border-radius: 7px;
@@ -6009,6 +6024,7 @@ p {
   background: #fff;
   font-size: 12px;
   line-height: 1.55;
+  overflow-wrap: anywhere;
 }
 
 .bubble.theirs {
@@ -6027,9 +6043,7 @@ p {
   display: grid;
   align-content: end;
   color: white;
-  background:
-    linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.64)),
-    var(--chat-image, url("/assets/story/postcard-wutong-avenue.png")) center / cover no-repeat;
+  background: var(--chat-image, url("/assets/story/postcard-wutong-avenue.png")) center / cover no-repeat;
 }
 
 .clickableImageBubble {
@@ -6065,36 +6079,6 @@ p {
   text-align: center;
 }
 
-.historicalReplyButton {
-  width: calc(100% + 16px);
-  border: 0;
-  margin: 0 -8px;
-  padding: 8px 14px 10px;
-  color: inherit;
-  background: #ebebeb;
-  text-align: right;
-  cursor: pointer;
-  box-shadow: none;
-}
-
-.historicalReplyButton span {
-  display: block;
-}
-
-.historicalReplyButton span {
-  width: fit-content;
-  max-width: min(78%, 240px);
-  margin-left: auto;
-  border-radius: 7px;
-  padding: 8px 10px;
-  color: #11210a;
-  background: #95ec69;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: left;
-  box-shadow: 0 4px 12px rgba(68, 142, 35, 0.18);
-}
-
 .historicalNextButton {
   width: calc(100% + 16px);
   border: 0;
@@ -6119,7 +6103,8 @@ p {
 }
 
 .wechatInputBar span,
-.wechatInputBar b {
+.wechatInputBar b,
+.wechatReplyInputButton {
   min-height: 30px;
   display: grid;
   place-items: center;
@@ -6128,6 +6113,19 @@ p {
   background: white;
   font-size: 13px;
   font-weight: 500;
+}
+
+.wechatReplyInputButton {
+  width: 100%;
+  border: 0;
+  padding: 5px 12px;
+  color: #17340d;
+  background: #95ec69;
+  font-family: inherit;
+  line-height: 1.35;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(68, 142, 35, 0.16);
 }
 
 .albumAppView,
