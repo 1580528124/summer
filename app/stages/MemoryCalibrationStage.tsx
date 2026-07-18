@@ -323,6 +323,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   const currentLine = currentFragment?.lines[Math.min(fragmentLineIndex, Math.max(currentFragment.lines.length - 1, 0))];
   const allFragmentsDone = completedFragments.length === fragmentOrder.length;
   const currentStepId = fragmentOrder[completedFragments.length];
+  const currentStepIsPhoneAccessible = currentStepId === "voice" || Boolean(currentStepId && isPhoneStep(currentStepId));
   const showFinalChoice = failedCalibration.length >= calibrationChoices.length;
   const activeScheduleBranch = schedulePresenceChoice ? scheduleBranches.find((branch) => branch.key === schedulePresenceChoice) ?? null : null;
   const activeScheduleBeat = activeScheduleBranch && scheduleReplyBeatIndex >= 0 ? activeScheduleBranch.beats[Math.min(scheduleReplyBeatIndex, activeScheduleBranch.beats.length - 1)] : null;
@@ -580,12 +581,12 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
           <button
             className={cx(
               "phone item hasSprite memoryItem guidePhoneItem",
-              currentStepId && isPhoneStep(currentStepId) && isUnlocked(currentStepId) && "phoneVibrating",
+              currentStepId && currentStepIsPhoneAccessible && isUnlocked(currentStepId) && "phoneVibrating",
               phoneStepIds.every((id) => completedFragments.includes(id)) && "seen",
-              activePhoneStep && "activeMemoryItem",
-              (!currentStepId || !isPhoneStep(currentStepId) || !isUnlocked(currentStepId)) && "lockedMemoryItem"
+              (activePhoneStep || activeFragment === "voice") && "activeMemoryItem",
+              (!currentStepId || !currentStepIsPhoneAccessible || !isUnlocked(currentStepId)) && "lockedMemoryItem"
             )}
-            onClick={() => currentStepId && isPhoneStep(currentStepId) && openStep(currentStepId)}
+            onClick={() => currentStepId && currentStepIsPhoneAccessible && openStep(currentStepId)}
             type="button"
             aria-label="查看周也刚刚发来的微信消息"
           >
@@ -616,25 +617,6 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
             <span>{getStepMeta(currentStepId).title}</span>
           </button>
         )}
-      </section>
-
-      <section className="wechatMemoryProgress roomMemoryProgress calibrationProgress" aria-label="记忆校准碎片">
-        {fragmentOrder.map((id, index) => {
-          const item = getStepMeta(id);
-          const unlocked = isUnlocked(id);
-          return (
-            <button
-              className={cx(completedFragments.includes(id) && "done", (activeFragment === id || activePhoneStep === id) && "active")}
-              disabled={!unlocked}
-              onClick={() => openStep(id)}
-              type="button"
-              key={item.title}
-            >
-              <small>{index + 1}/{fragmentOrder.length}</small>
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
       </section>
 
       {currentFragment && activeFragment !== "phone" && currentLine && (

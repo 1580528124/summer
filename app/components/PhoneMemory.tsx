@@ -247,8 +247,9 @@ const memoryConversations = [
     { type: "theirs", text: "现在已经驼了" },
     { type: "mine", text: "那我到时候每天提醒你一下" },
     { type: "theirs", text: "你最好记得" },
-    { type: "theirs", text: "[图片：钉钉排班，休周二] 我下周排班出来了，休周二。", image: true, imageSrc: "/assets/story/chat-schedule-tuesday-2025.png" },
-    { type: "mine", text: "周二？不是周末啊" },
+    { type: "date", text: "2025年7月17日" },
+    { type: "theirs", text: "[图片：钉钉排班，休周二] 我下周排班出来啦，周二终于能歇歇了", image: true, imageSrc: "/assets/story/chat-schedule-tuesday-2025.png" },
+    { type: "mine", text: "周二？为什么不是周末啊" },
     { type: "theirs", text: "当然是轮休喽 " },
     { type: "theirs", text: "新人休不了周末" },
     { type: "theirs", text: "没办法喽" },
@@ -299,28 +300,31 @@ const memoryConversations = [
     { type: "mine", text: "你在哪？我到南京南了。" },
     { type: "theirs", text: "花坛这儿。还在这儿。" },
     { type: "mine", text: "我跑过来。" },
-    { type: "system", text: "*(他跑过去。她站起来。)*" },
-    { type: "theirs", text: "你来了。" },
-    { type: "mine", text: "对不起对不起。" },
-    { type: "theirs", text: "没事。" },
-    { type: "mine", text: "饿不饿？" },
-    { type: "theirs", text: "饿。" },
-    { type: "mine", text: "走，吃汤包去。" },
-    { type: "theirs", text: "等等。你先站那儿别动。" },
-    { type: "mine", text: "干嘛？" },
-    { type: "theirs", text: "让我看一眼。快两个月没见了。" },
-    { type: "mine", text: "……胖了没有？" },
-    { type: "theirs", text: "瘦了。黑眼圈重了。" },
-    { type: "mine", text: "读研就这样。" },
-    { type: "theirs", text: "那你以后毕业了得补回来。" },
-    { type: "mine", text: "补。你监督我。" },
-    { type: "theirs", text: "走吧。带我去吃汤包。饿死了。还有——你知道我提前多久申请的？十二天。然后你让我在花坛边坐了快两个小时。" },
-    { type: "mine", text: "我知道错了。" },
-    { type: "theirs", text: "下次开会你跟你导师说\"我女朋友要来\"。" },
-    { type: "mine", text: "导师又不认我女朋友。" },
-    { type: "theirs", text: "那你跟导师说\"我女朋友打我\"。" },
-    { type: "mine", text: "你打吗？" },
-    { type: "theirs", text: "看情况。" },
+    { type: "narration", text: "聊天记录到这里停住了。" },
+    { type: "narration", text: "后面的事没有留在手机里。" },
+    { type: "narration", text: "但我记得。" },
+    { type: "narration", text: "我跑到南京南站出口。她从花坛边站起来，腿被蚊子咬了好几个包。" },
+    { type: "memory", speaker: "周也", text: "你来了。" },
+    { type: "memory", speaker: "我", text: "对不起对不起。" },
+    { type: "memory", speaker: "周也", text: "没事。" },
+    { type: "memory", speaker: "我", text: "饿不饿？" },
+    { type: "memory", speaker: "周也", text: "饿。" },
+    { type: "memory", speaker: "我", text: "走，吃汤包去。" },
+    { type: "memory", speaker: "周也", text: "等等。你先站那儿别动。" },
+    { type: "memory", speaker: "我", text: "干嘛？" },
+    { type: "memory", speaker: "周也", text: "让我看一眼。快两个月没见了。" },
+    { type: "memory", speaker: "我", text: "……胖了没有？" },
+    { type: "memory", speaker: "周也", text: "瘦了。黑眼圈重了。" },
+    { type: "memory", speaker: "我", text: "读研就这样。" },
+    { type: "memory", speaker: "周也", text: "那你以后毕业了得补回来。" },
+    { type: "memory", speaker: "我", text: "补。你监督我。" },
+    { type: "memory", speaker: "周也", text: "走吧。带我去吃汤包。饿死了。还有——你知道我提前多久申请的？十二天。然后你让我在花坛边坐了快两个小时。" },
+    { type: "memory", speaker: "我", text: "我知道错了。" },
+    { type: "memory", speaker: "周也", text: "下次开会你跟你导师说\"我女朋友要来\"。" },
+    { type: "memory", speaker: "我", text: "导师又不认我女朋友。" },
+    { type: "memory", speaker: "周也", text: "那你跟导师说\"我女朋友打我\"。" },
+    { type: "memory", speaker: "我", text: "你打吗？" },
+    { type: "memory", speaker: "周也", text: "看情况。" },
     { type: "date", text: "2025年9月，他去北京（备忘录片段转聊天记录）" },
     { type: "system", text: "*(他买了票，没告诉她。从下午四点半等到晚上九点多。)*" },
     { type: "theirs", text: "你怎么来了？？？" },
@@ -418,30 +422,29 @@ const memoryConversations = [
   [
     { type: "date", text: "2026年1月27日" },
     { type: "system", text: "通话记录：4分32秒" },
-    { type: "theirs", text: "我们最近话越来越少了。" },
-    { type: "mine", text: "嗯。" },
-    { type: "theirs", text: "你总是\"嗯\"。" },
-    { type: "mine", text: "我不知道说什么。" },
-    { type: "theirs", text: "你以前不是这样的。" },
-    { type: "mine", text: "以前我们在一起。" },
+    { type: "theirs", text: "我们最近话感觉越来越少了" },
+    { type: "mine", text: "嗯" },
+    { type: "theirs", text: "你总是只说\"嗯\"" },
+    { type: "mine", text: "但我不知道该说些什么" },
+    { type: "theirs", text: "我们以前不是这样的" },
+    { type: "mine", text: "以前我们在一起" },
     { type: "theirs", text: "所以现在不在一起了，你就不说话了？" },
-    { type: "mine", text: "你工作那么累，我说什么也帮不上忙。" },
-    { type: "theirs", text: "我不要你帮忙。我就想听你说句话。" },
-    { type: "mine", text: "我说了你就不累了？" },
-    { type: "system", text: "*(沉默很久)*" },
-    { type: "theirs", text: "要不……我们先分开吧。" },
-    { type: "mine", text: "好。" },
+    { type: "mine", text: "你工作那么累，我即使说些什么也帮不上忙" },
+    { type: "theirs", text: "我不要你帮忙。我就想听你说句话" },
+    { type: "mine", text: "但是我说了你就不累了？" },
+    { type: "date", text: "2026年1月28日" },
+    { type: "theirs", text: "那要不……我们先停一停吧" },
+    { type: "mine", text: "好" },
     { type: "theirs", text: "你就说\"好\"？" },
-    { type: "mine", text: "你说了算。" },
-    { type: "theirs", text: "……我真服了。你知不知道我打这个电话之前想了多久？我告诉自己，你今天要是能说一句\"我不想分开\"，我就当什么都没发生。结果你只说了一个\"好\"。" },
-    { type: "mine", text: "我不知道该怎么留你。你在北京过得那么累，我什么都帮不上。" },
-    { type: "theirs", text: "我要的不是你帮我。是你在。" },
-    { type: "mine", text: "我在啊。" },
+    { type: "mine", text: "你说了算" },
+    { type: "theirs", text: "我真服了。你知不知道我之前想了多久？我告诉自己，你今天要是能说一句\"我不想分开\"，我就当什么都没发生。结果你只说了一个\"好\"。" },
+    { type: "mine", text: "我不知道该怎么留你。你在北京过得很累，但我什么都帮不上" },
+    { type: "theirs", text: "我要的不是你帮我。是你在" },
+    { type: "mine", text: "我在啊" },
     { type: "theirs", text: "你在哪？你在南京，我在北京。你跟我说\"好\"的时候，你在哪？" },
-    { type: "mine", text: "……对不起。" },
-    { type: "theirs", text: "别道歉了。你永远在道歉。你从来不提前说什么。你永远等我先开口。我累了。" },
-    { type: "mine", text: "我知道。" },
-    { type: "theirs", text: "那就这样吧。挂了。" },
+    { type: "mine", text: "对不起" },
+    { type: "theirs", text: "别道歉了。你永远在道歉。你从来不提前说什么。你永远等我先开口。我累了" },
+    { type: "theirs", text: "那我们就这样吧" },
     { type: "system", text: "整个通话里，你没有说过一句\"我不想分开\"。" }
   ]
 ] as const;
@@ -589,6 +592,13 @@ function WechatConversation({
                 <div className="chatDate" key={`${message.text}-${index}`}>{message.text}</div>
               ) : message.type === "system" ? (
                 <p className="bubble systemBubble" key={`${message.text}-${index}`}>{message.text}</p>
+              ) : message.type === "narration" ? (
+                <p className="phoneMemoryNarration" key={`${message.text}-${index}`}>{message.text}</p>
+              ) : message.type === "memory" ? (
+                <p className={cx("phoneMemoryRecallLine", message.speaker === "我" && "me")} key={`${message.text}-${index}`}>
+                  <b>{message.speaker}</b>
+                  <span>{message.text}</span>
+                </p>
               ) : "image" in message && message.image ? (
                 renderImageMessage(
                   message.text,
@@ -620,7 +630,7 @@ function WechatConversation({
             {pendingMemoryMessage.text}
           </button>
         ) : (
-          <b>{stageMode && !liveMessages ? memoryChapterCompleted ? "这段旧对话已读完" : "等待当年的回复" : "说点什么"}</b>
+          <b>{stageMode && !liveMessages ? memoryChapterCompleted ? "这段旧对话已读完" : "" : "说点什么"}</b>
         )}
         <span>☺</span>
       </div>

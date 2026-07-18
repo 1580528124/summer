@@ -9,15 +9,41 @@ export function FarewellStage(props: Props) {
 
   return (
         <section className="phoneFinal">
-          <article className="moments">
-            <p className="eyebrow">朋友圈</p>
-            <h2>旧照片已整理。是否发到朋友圈？</h2>
-            <div className="photoPost">
-              <div className="photoPlane">梧桐大道 / 2024 秋天</div>
-              <p>收拾东西翻到的。2024 年秋天，南京。那时候真好。</p>
-              <span>林小满：2024 年……好怀念啊。她最近在北京升职了。你俩还有联系吗？</span>
-              <strong>周也 赞了你的朋友圈。</strong>
-            </div>
+          <article className="moments momentsPhoneMock">
+            <header className="momentsTop">
+              <button type="button" aria-label="返回">‹</button>
+              <strong>朋友圈</strong>
+              <span>•••</span>
+            </header>
+            <section className="momentsCover">
+              <div>
+                <b>南京在读研</b>
+                <i>我</i>
+              </div>
+            </section>
+            <article className="wechatMomentPost">
+              <i className="momentAvatar">我</i>
+              <div className="momentPostBody">
+                <header>
+                  <b>南京在读研</b>
+                  <small>刚刚</small>
+                </header>
+                <p>收拾东西翻到的。2024 年秋天，南京。那时候真好。</p>
+                <button className="momentPhoto" type="button" aria-label="查看梧桐大道照片">
+                  <img src="/assets/story/wutong-road-autumn-2024.png" alt="" draggable={false} />
+                </button>
+                <div className="momentMeta">
+                  <span>南京 · 梧桐大道</span>
+                  <button type="button">··</button>
+                </div>
+                <section className="momentReactions">
+                  <p><b>周也</b>、<b>林小满</b> 赞了这条朋友圈</p>
+                  <p><b>林小满：</b>2024 年……好怀念啊。她最近在北京升职了。你俩还有联系吗？</p>
+                  <p><b>我 回复 林小满：</b>很久没联系了。</p>
+                  <p><b>周也：</b>梧桐大道。你还留着这张啊。</p>
+                </section>
+              </div>
+            </article>
           </article>
 
           <article className="chatCard">
