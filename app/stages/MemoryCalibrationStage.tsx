@@ -619,7 +619,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
         )}
       </section>
 
-      {currentFragment && activeFragment !== "phone" && currentLine && (
+      {currentFragment && currentLine && (
         <div className="wechatMemoryBackdrop fragmentMemoryBackdrop">
           <article className={cx("fragmentMemoryScene", `fragmentMemoryScene-${activeFragment}`)}>
             <button className="wechatPhoneClose" onClick={closeFragment} type="button" aria-label="关闭当前记忆">×</button>

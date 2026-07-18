@@ -29,6 +29,13 @@ type HomeApp = {
 };
 
 type WechatTab = "chats" | "contacts" | "discover" | "me";
+type MemoryChatMessage = {
+  type: "date" | "system" | "theirs" | "mine" | "narration" | "memory";
+  text: string;
+  speaker?: "周也" | "我";
+  image?: true;
+  imageSrc?: string;
+};
 
 const homeApps: HomeApp[] = [
   { id: "wechat", label: "微信", image: "/assets/phone-apps/wechat.png", badge: "12" },
@@ -168,11 +175,11 @@ function WechatList({ openChat, activeTab, setActiveTab }: { openChat: () => voi
   );
 }
 
-const memoryConversations = [
+const memoryConversations: MemoryChatMessage[][] = [
   [
     { type: "date", text: "2024年3月5日" },
     { type: "theirs", text: "[图片：小龙虾] 这个好吃下次我们一起去！！！", image: true, imageSrc: "/assets/story/chat-crayfish-2024.png" },
-    { type: "thiers", text: "你剥虾我负责吃😋" },
+    { type: "theirs", text: "你剥虾我负责吃😋" },
     { type: "mine", text: "我剥壳很慢的" },
     { type: "theirs", text: "没事，你剥一只我吃一只，你剥两只我吃两只，不耽误" },
     { type: "mine", text: "哈哈哈哈哈哈那你得准备一打湿纸巾" },
@@ -447,7 +454,7 @@ const memoryConversations = [
     { type: "theirs", text: "那我们就这样吧" },
     { type: "system", text: "整个通话里，你没有说过一句\"我不想分开\"。" }
   ]
-] as const;
+];
 
 const defaultChatImage = "/assets/story/postcard-wutong-avenue.png";
 
