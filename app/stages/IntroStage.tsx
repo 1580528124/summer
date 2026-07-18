@@ -1,14 +1,59 @@
 ﻿"use client";
 
+import { useEffect, useRef, useState } from "react";
 import { cx, speakerLabel } from "../story/utils";
 
 type Props = Record<string, any>;
 
+const introMusicSrc = "/audio/04-yu-jian.mp3";
+
 export function IntroStage(props: Props) {
   const { introPhotoOpen, introPhotoLineIndex, introPhotoLines, currentIntroPhotoLine, advanceIntroPhotoLine, setVnLineIndex, setResponseLineIndex, setPhase, introPackedCount, introPackItems, introPackedDone, introPackLine, introPackNarrationVisible, packedIntroItems, packIntroItem, activeIntroPackItem, activeIntroMemory, currentIntroMemoryLine, introMemoryLineIndex, advanceIntroMemory, postcardFlipped, setPostcardFlipped, openIntroPhoto } = props;
+  const introMusicRef = useRef<HTMLAudioElement>(null);
+  const [introMusicPlaying, setIntroMusicPlaying] = useState(false);
+
+  useEffect(() => {
+    const audio = introMusicRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.36;
+
+    const playIntroMusic = () => {
+      audio.play()
+        .then(() => setIntroMusicPlaying(true))
+        .catch(() => setIntroMusicPlaying(false));
+    };
+
+    playIntroMusic();
+    window.addEventListener("pointerdown", playIntroMusic, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", playIntroMusic);
+      audio.pause();
+    };
+  }, []);
+
+  function toggleIntroMusic() {
+    const audio = introMusicRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play()
+        .then(() => setIntroMusicPlaying(true))
+        .catch(() => setIntroMusicPlaying(false));
+      return;
+    }
+
+    audio.pause();
+    setIntroMusicPlaying(false);
+  }
 
   return (
         <section className={cx("curtain introCurtain", introPhotoOpen && "photoOpen")}>
+          <audio ref={introMusicRef} src={introMusicSrc} loop preload="auto" />
+          <button className={cx("introMusicToggle", introMusicPlaying && "playing")} onClick={toggleIntroMusic} type="button">
+            {introMusicPlaying ? "音乐开" : "音乐关"}
+          </button>
           {!introPhotoOpen ? (
             <div className="introPackStage">
               <div className="introRoom" aria-label="2027 年 6 月，研究生宿舍">

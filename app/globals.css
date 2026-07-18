@@ -284,6 +284,27 @@ p {
   padding: 0;
 }
 
+.introMusicToggle {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  z-index: 20;
+  border: 1px solid rgba(245, 234, 220, 0.26);
+  border-radius: 999px;
+  padding: 8px 12px;
+  color: rgba(245, 234, 220, 0.76);
+  background: rgba(10, 12, 17, 0.56);
+  font-size: 12px;
+  font-weight: 800;
+  backdrop-filter: blur(10px);
+}
+
+.introMusicToggle.playing {
+  border-color: rgba(216, 163, 95, 0.56);
+  color: #fff3d9;
+  background: rgba(86, 61, 37, 0.58);
+}
+
 .introPackStage {
   display: grid;
   grid-template-rows: minmax(640px, 1fr);
