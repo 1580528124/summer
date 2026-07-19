@@ -100,7 +100,7 @@ const memoryFragments: Record<FragmentId, MemoryFragment> = {
       { speaker: "", text: "北京南到南京南，G23，558.5元。她也收藏过这趟车。", kind: "narration" },
       { speaker: "我", text: "这个我不知道。", kind: "dialogue" },
       { speaker: "", text: "不是所有没说出口的东西，都不存在。", kind: "system" },
-      { speaker: "", text: "北京攻略截图里，药店、便利店、她公司附近的餐厅被圈出来。备注：她下班晚，别约太远。买感冒药。", kind: "narration" },
+      { speaker: "", text: "北京攻略截图里，吃饭、看展、散步、晚霞被一项项排好。最下面写着：提前告诉她，别让她等太久。", kind: "narration" },
       { speaker: "", text: "隐藏文件出现：2025年11月11日 北京南-南京南.pdf。状态：已退票。退票时间：23:47。", kind: "system" },
       { speaker: "我", text: "她都说没事了。我去了也帮不上什么。", kind: "dialogue" },
       { speaker: "", text: "你没有去。所以你永远不知道有没有用。", kind: "system" },
@@ -164,9 +164,9 @@ const memoryFragments: Record<FragmentId, MemoryFragment> = {
 };
 
 const calibrationChoices = [
-  { key: "A", text: "没有。异地太难了。", fail: "校准失败。距离是事实，不是答案。" },
-  { key: "B", text: "没有。她已经太累了。", fail: "校准失败。疲惫是结果，不是原因。" },
-  { key: "C", text: "没有。我不想逼她。", fail: "校准失败。尊重不是沉默。" }
+  { key: "A", text: "没有。异地太难了。", fail: "距离是事实，不是答案。" },
+  { key: "B", text: "没有。她已经太累了。", fail: "疲惫是结果，不是原因。" },
+  { key: "C", text: "没有。我不想逼她。", fail: "尊重不是沉默。" }
 ];
 
 const scheduleBranches: ScheduleBranch[] = [
@@ -284,7 +284,8 @@ const computerFiles: ComputerFile[] = [
     lineIndex: 13,
     danger: false,
     previewTitle: "北京攻略截图",
-    previewLines: ["她下班晚，别约太远。", "附近有没有南京菜？", "买感冒药。"]
+    previewLines: ["周也休息日路线：吃饭、看展、散步。", "别排太满，给她留一点慢下来的时间。", "备选：她想吃南京菜就去南京大牌档。"],
+    image: "/assets/story/beijing-guide-2025.png"
   },
   {
     name: "2025-11-11 北京南-南京南.pdf",
@@ -314,6 +315,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   const [scheduleMessageArrived, setScheduleMessageArrived] = useState(false);
   const [scheduleMessageRead, setScheduleMessageRead] = useState(false);
   const [openedComputerImage, setOpenedComputerImage] = useState<ComputerFile | null>(null);
+  const [viewedComputerFileIndexes, setViewedComputerFileIndexes] = useState<number[]>([]);
   const [phoneInitialApp, setPhoneInitialApp] = useState<PhoneApp>("home");
   const [returnToComputerAfterPhone, setReturnToComputerAfterPhone] = useState(false);
   const [scheduleReplyBeatIndex, setScheduleReplyBeatIndex] = useState(-1);
@@ -328,6 +330,10 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   const activeScheduleBranch = schedulePresenceChoice ? scheduleBranches.find((branch) => branch.key === schedulePresenceChoice) ?? null : null;
   const activeScheduleBeat = activeScheduleBranch && scheduleReplyBeatIndex >= 0 ? activeScheduleBranch.beats[Math.min(scheduleReplyBeatIndex, activeScheduleBranch.beats.length - 1)] : null;
   const scheduleReactionComplete = Boolean(activeScheduleBranch && scheduleReplyBeatIndex >= activeScheduleBranch.beats.length - 1);
+  const regularComputerFileCount = computerFiles.length - 1;
+  const hiddenComputerFileUnlocked = viewedComputerFileIndexes.length >= regularComputerFileCount;
+  const visibleComputerFiles = hiddenComputerFileUnlocked ? computerFiles : computerFiles.slice(0, regularComputerFileCount);
+  const waitingForComputerFiles = currentFragment?.id === "computer" && fragmentLineIndex === 13 && !hiddenComputerFileUnlocked;
   const scheduleLiveMessages: LiveChatMessage[] = activeScheduleBranch
     ? [
         { speaker: "me", text: activeScheduleBranch.reply },
@@ -363,6 +369,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
     setActivePhoneStep(null);
     setFragmentLineIndex(0);
     setOpenedComputerImage(null);
+    setViewedComputerFileIndexes([]);
     setReturnToComputerAfterPhone(false);
     setScheduleReplyBeatIndex(-1);
 
@@ -459,6 +466,9 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
 
   function advanceFragment() {
     if (!currentFragment) return;
+    if (currentFragment.id === "computer" && fragmentLineIndex === 13 && !hiddenComputerFileUnlocked) {
+      return;
+    }
     if (fragmentLineIndex < currentFragment.lines.length - 1) {
       setFragmentLineIndex((index) => index + 1);
       return;
@@ -494,10 +504,14 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   }
 
   function getActiveComputerFile() {
-    return [...computerFiles].reverse().find((file) => fragmentLineIndex >= file.lineIndex) ?? computerFiles[0];
+    return [...visibleComputerFiles].reverse().find((file) => fragmentLineIndex >= file.lineIndex) ?? visibleComputerFiles[0];
   }
 
   function openComputerFile(file: ComputerFile) {
+    const fileIndex = computerFiles.findIndex((item) => item.name === file.name);
+    if (fileIndex >= 0 && fileIndex < regularComputerFileCount) {
+      setViewedComputerFileIndexes((current) => (current.includes(fileIndex) ? current : [...current, fileIndex]));
+    }
     if (file.image) {
       setOpenedComputerImage(file);
     } else {
@@ -559,10 +573,9 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
           <span className="pinNote">北京-南京<br />1078 公里</span>
           <span className="pinPhoto">2024 秋</span>
         </div>
-        <button className="window item hasSprite" disabled type="button" aria-label="窗外梧桐">
+        <div className="window item hasSprite memoryBackdropWindow" aria-hidden="true">
           <img className="itemSprite" src="/assets/story/intro-night-window-wide.png" alt="" draggable={false} />
-          <span>梧桐树影</span>
-        </button>
+        </div>
         <button className="calendar item hasSprite storyCalendar" disabled type="button" aria-label="2024 年日历">
           <img className="itemSprite" src="/assets/items/calendar.png" alt="" draggable={false} />
         </button>
@@ -629,7 +642,13 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
             </div>
             <div className="fragmentMemoryMock">
               {activeFragment === "computer" && (
-                <div className="mockComputerOS">
+                <div className="mockComputerOS" onClick={(event) => {
+                  const target = event.target;
+                  if (!(target instanceof HTMLElement)) return;
+                  if (!target.matches(".mockExplorerTitlebar b:last-child")) return;
+                  setFragmentLineIndex(0);
+                  setOpenedComputerImage(null);
+                }}>
                   <div className="mockComputerDesktop">
                     <button className={cx("osFolderIcon", fragmentLineIndex > 0 && "opened")} onClick={() => setFragmentLineIndex((index) => Math.max(index, 1))} type="button">
                       <i />
@@ -663,7 +682,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
                           <span>修改日期</span>
                           <span>类型</span>
                         </div>
-                        {computerFiles.map((file) => {
+                        {visibleComputerFiles.map((file) => {
                           const activeFile = getActiveComputerFile().name === file.name;
                           return (
                             <button
@@ -692,7 +711,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
                         {getActiveComputerFile().previewLines.map((line) => <p key={line}>{line}</p>)}
                       </section>
                     </div>
-                    <footer>{computerFiles.length} 个项目 · 已选择 1 个项目</footer>
+                    <footer>{visibleComputerFiles.length} 个项目 · 已选择 1 个项目</footer>
                   </div>
                   {openedComputerImage?.image && (
                     <div className={cx("mockPhotoViewer", openedComputerImage.portrait && "portraitPhotoViewer")}>
@@ -747,7 +766,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
             >
               {speakerLabel(currentLine.speaker) && <span className="speakerName">{speakerLabel(currentLine.speaker)}</span>}
               <p>{currentLine.text}</p>
-              <i>{fragmentLineIndex < currentFragment.lines.length - 1 ? "点击继续" : currentFragment.doneText}</i>
+              <i>{waitingForComputerFiles ? "先看完文件夹里的四个文件" : fragmentLineIndex < currentFragment.lines.length - 1 ? "点击继续" : currentFragment.doneText}</i>
             </button>
           </article>
         </div>
@@ -837,7 +856,6 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
       {allFragmentsDone && (
         <div className="wechatMemoryBackdrop calibrationBackdrop">
           <article className="calibrationConfirm">
-            <p className="eyebrow">校准确认</p>
             <h2>2026年1月，她提出分开时，你是否真的没有机会挽回？</h2>
             <div className="calibrationChoiceList">
               {calibrationChoices.map((choice) => (

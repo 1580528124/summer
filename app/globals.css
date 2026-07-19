@@ -2949,6 +2949,9 @@ p {
 .memoryWechatRoom {
   min-height: 660px;
   margin-bottom: 14px;
+  background:
+    radial-gradient(circle at 54% 44%, rgba(111, 145, 168, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(34, 39, 47, 0.98) 0 58%, rgba(48, 38, 32, 0.98) 58% 100%);
 }
 
 .memoryWechatRoom::after {
@@ -4993,15 +4996,30 @@ p {
   z-index: 2;
   width: 225px;
   height: 410px;
-  border: 10px solid #3a251d;
+  border: 12px solid #4a2c1d;
   border-bottom-width: 18px;
-  border-radius: 6px 6px 3px 3px;
+  border-radius: 7px 7px 4px 4px;
   background:
-    linear-gradient(90deg, rgba(255, 224, 165, 0.08), transparent 18%, rgba(0, 0, 0, 0.16)),
-    repeating-linear-gradient(90deg, #d7b06a 0 14px, #7d4a38 14px 22px, #496c83 22px 33px, #d89d53 33px 44px, #473556 44px 55px, transparent 55px 70px),
-    linear-gradient(180deg, #5f3926, #351f18);
-  background-size: auto, 100% 92px, auto;
-  box-shadow: 18px 26px 44px rgba(0, 0, 0, 0.32);
+    linear-gradient(90deg, rgba(255, 231, 184, 0.12), transparent 16%, rgba(0, 0, 0, 0.24) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.16), transparent 8% 92%, rgba(0, 0, 0, 0.22)),
+    repeating-linear-gradient(90deg,
+      #d1a65d 0 11px,
+      #6a3f30 11px 18px,
+      #b98d51 18px 28px,
+      #2f5468 28px 36px,
+      #8a5e3d 36px 44px,
+      #422a22 44px 57px,
+      #d7b66f 57px 69px,
+      #5c4167 69px 80px,
+      #263f51 80px 89px,
+      #b87944 89px 103px,
+      transparent 103px 118px),
+    linear-gradient(180deg, #6a422b, #3a2319);
+  background-size: auto, auto, 100% 96px, auto;
+  box-shadow:
+    inset 8px 0 rgba(255, 221, 165, 0.06),
+    inset -12px 0 rgba(0, 0, 0, 0.22),
+    18px 26px 44px rgba(0, 0, 0, 0.34);
 }
 
 .bookcase::before {
@@ -5009,23 +5027,55 @@ p {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, transparent 31%, #2b1913 31% 35%, transparent 35% 63%, #2b1913 63% 67%, transparent 67%),
-    radial-gradient(circle at 70% 82%, rgba(216, 163, 95, 0.16), transparent 18%);
+    linear-gradient(180deg,
+      transparent 28%,
+      rgba(28, 15, 10, 0.68) 28% 31%,
+      rgba(126, 76, 43, 0.95) 31% 34%,
+      transparent 34% 59%,
+      rgba(28, 15, 10, 0.7) 59% 62%,
+      rgba(126, 76, 43, 0.95) 62% 65%,
+      transparent 65% 87%,
+      rgba(28, 15, 10, 0.7) 87% 90%,
+      rgba(126, 76, 43, 0.95) 90% 93%,
+      transparent 93%),
+    radial-gradient(circle at 72% 81%, rgba(216, 163, 95, 0.18), transparent 20%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent 7% 92%, rgba(0, 0, 0, 0.34));
+  pointer-events: none;
+}
+
+.bookcase::after {
+  content: "";
+  position: absolute;
+  left: 24px;
+  right: 22px;
+  top: 72px;
+  height: 26px;
+  border-radius: 3px;
+  background:
+    linear-gradient(90deg, #c9b07a 0 30px, transparent 30px 46px, #d9d0b8 46px 86px, transparent 86px 102px, #7d4b3b 102px 134px, transparent 134px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(0, 0, 0, 0.12));
+  box-shadow:
+    34px 132px 0 -4px #d8d0b8,
+    98px 132px 0 -5px #8f5d42,
+    62px 270px 0 -6px #c6a567;
+  opacity: 0.86;
 }
 
 .shelf {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  height: 12px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #8c5635, #342018);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  left: 8px;
+  right: 8px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #9a623b, #5a3321 58%, #2e1b14);
+  box-shadow:
+    0 7px 13px rgba(0, 0, 0, 0.34),
+    inset 0 2px rgba(255, 221, 165, 0.16);
 }
 
-.shelfTop { top: 31%; }
-.shelfMid { top: 63%; }
-.shelfLow { bottom: 8%; }
+.shelfTop { top: 30%; }
+.shelfMid { top: 61%; }
+.shelfLow { bottom: 7%; }
 
 .pinboard {
   position: absolute;
@@ -6868,8 +6918,8 @@ p {
   border-radius: 8px;
   color: #eaf1f8;
   background:
-    radial-gradient(circle at 22% 28%, rgba(70, 122, 154, 0.42), transparent 32%),
-    radial-gradient(circle at 82% 24%, rgba(216, 163, 95, 0.22), transparent 30%),
+    linear-gradient(180deg, rgba(10, 16, 25, 0.12), rgba(5, 8, 13, 0.5)),
+    url("/assets/story/intro-night-window-wide.png") center / cover no-repeat,
     linear-gradient(135deg, #192433, #0b111b 62%, #111821);
 }
 
@@ -6877,6 +6927,48 @@ p {
   position: absolute;
   inset: 0 0 38px;
   padding: 26px;
+  background:
+    radial-gradient(circle at 74% 16%, rgba(255, 255, 255, 0.12), transparent 12%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0 1px, transparent 1px 100%);
+  background-size: auto, 64px 64px, 64px 64px;
+}
+
+.mockComputerDesktop::before,
+.mockComputerDesktop::after {
+  position: absolute;
+  left: 34px;
+  pointer-events: none;
+}
+
+.mockComputerDesktop::before {
+  content: "";
+  top: 266px;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 38%),
+    linear-gradient(180deg, #65a8ff, #1c5fb9);
+  box-shadow:
+    0 70px 0 #f0c24f,
+    0 140px 0 #d33a31,
+    0 7px 16px rgba(0, 0, 0, 0.3),
+    0 77px 16px rgba(0, 0, 0, 0.3),
+    0 147px 16px rgba(0, 0, 0, 0.3);
+}
+
+.mockComputerDesktop::after {
+  content: "QQ\A 浏览器\A 网易云";
+  top: 303px;
+  width: 70px;
+  color: rgba(246, 250, 255, 0.88);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 70px;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.72);
+  white-space: pre;
 }
 
 .osFolderIcon {
@@ -6896,8 +6988,8 @@ p {
 
 .osFolderIcon:hover,
 .osFolderIcon.opened {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(135, 190, 255, 0.56);
+  background: rgba(80, 150, 235, 0.22);
 }
 
 .osFolderIcon i {
@@ -6921,28 +7013,65 @@ p {
 }
 
 .osFolderIcon span {
-  font-size: 13px;
+  font-size: 0;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.72);
+}
+
+.osFolderIcon span::after {
+  content: "以后";
+  font-size: 13px;
 }
 
 .osDesktopShortcut {
   position: absolute;
   left: 34px;
   display: grid;
+  grid-template-rows: 34px auto;
+  gap: 5px;
   place-items: center;
   width: 70px;
-  min-height: 54px;
-  color: rgba(234, 241, 248, 0.72);
-  font-size: 12px;
+  min-height: 64px;
+  color: rgba(246, 250, 255, 0.88);
+  font-size: 0;
   font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.72);
+}
+
+.osDesktopShortcut::before {
+  content: "";
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 38%),
+    linear-gradient(180deg, #d7e2ec, #748393);
+  box-shadow: 0 7px 16px rgba(0, 0, 0, 0.3);
+}
+
+.osDesktopShortcut::after {
+  font-size: 12px;
 }
 
 .osDesktopShortcut:nth-of-type(1) {
   top: 132px;
 }
 
+.osDesktopShortcut:nth-of-type(1)::after {
+  content: "回收站";
+}
+
 .osDesktopShortcut:nth-of-type(2) {
   top: 194px;
+}
+
+.osDesktopShortcut:nth-of-type(2)::before {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38), transparent 36%),
+    linear-gradient(135deg, #6cd885, #218d47);
+}
+
+.osDesktopShortcut:nth-of-type(2)::after {
+  content: "微信文件";
 }
 
 .mockExplorerWindow {
@@ -6954,9 +7083,10 @@ p {
   display: grid;
   grid-template-rows: 36px 42px minmax(0, 1fr) 30px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
-  background: rgba(245, 247, 250, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+  border-radius: 10px;
+  background: rgba(245, 247, 250, 0.92);
+  backdrop-filter: blur(14px);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
   transition: opacity 160ms ease, transform 160ms ease;
 }
@@ -6972,7 +7102,7 @@ p {
   grid-template-columns: 1fr 34px 34px 34px;
   align-items: center;
   color: #202630;
-  background: #f7f8fa;
+  background: rgba(247, 248, 250, 0.9);
   border-bottom: 1px solid #d9dde4;
   font-size: 12px;
   font-weight: 900;
@@ -6983,6 +7113,15 @@ p {
   align-items: center;
   gap: 8px;
   padding-left: 12px;
+}
+
+.mockExplorerTitlebar div span {
+  font-size: 0;
+}
+
+.mockExplorerTitlebar div span::after {
+  content: "以后";
+  font-size: 12px;
 }
 
 .mockExplorerTitlebar i {
@@ -6997,6 +7136,34 @@ p {
   place-items: center;
   height: 100%;
   color: #4e5662;
+  font-size: 13px;
+}
+
+.mockExplorerTitlebar b:last-child {
+  cursor: pointer;
+}
+
+.mockExplorerTitlebar b:last-child:hover {
+  color: #fff;
+  background: #d83b36;
+}
+
+.mockExplorerTitlebar b {
+  font-size: 0;
+}
+
+.mockExplorerTitlebar b:nth-of-type(1)::after {
+  content: "-";
+  font-size: 13px;
+}
+
+.mockExplorerTitlebar b:nth-of-type(2)::after {
+  content: "□";
+  font-size: 13px;
+}
+
+.mockExplorerTitlebar b:nth-of-type(3)::after {
+  content: "×";
   font-size: 13px;
 }
 
@@ -7036,6 +7203,32 @@ p {
   white-space: nowrap;
 }
 
+.mockExplorerToolbar span,
+.mockExplorerToolbar em,
+.mockExplorerToolbar button {
+  font-size: 0;
+}
+
+.mockExplorerToolbar button:nth-of-type(1)::after {
+  content: "‹";
+  font-size: 16px;
+}
+
+.mockExplorerToolbar button:nth-of-type(2)::after {
+  content: "›";
+  font-size: 16px;
+}
+
+.mockExplorerToolbar span::after {
+  content: "桌面 / 以后";
+  font-size: 12px;
+}
+
+.mockExplorerToolbar em::after {
+  content: "搜索“以后”";
+  font-size: 12px;
+}
+
 .mockExplorerToolbar em {
   color: #7b8592;
   background: #fff;
@@ -7064,6 +7257,36 @@ p {
   font-size: 11px;
 }
 
+.mockExplorerBody aside b,
+.mockExplorerBody aside span {
+  font-size: 0;
+}
+
+.mockExplorerBody aside b::after {
+  content: "快速访问";
+  font-size: 11px;
+}
+
+.mockExplorerBody aside span::after {
+  font-size: 12px;
+}
+
+.mockExplorerBody aside span:nth-of-type(1)::after {
+  content: "桌面";
+}
+
+.mockExplorerBody aside span:nth-of-type(2)::after {
+  content: "图片";
+}
+
+.mockExplorerBody aside span:nth-of-type(3)::after {
+  content: "文档";
+}
+
+.mockExplorerBody aside span:nth-of-type(4)::after {
+  content: "以后";
+}
+
 .mockExplorerBody aside span {
   border-radius: 5px;
   padding: 7px 8px;
@@ -7078,10 +7301,14 @@ p {
 .mockExplorerBody main {
   min-width: 0;
   display: grid;
-  grid-template-rows: 30px repeat(5, 42px);
+  grid-template-rows: 30px;
+  grid-auto-rows: 42px;
   align-content: start;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: #fff;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(112, 124, 140, 0.35) transparent;
 }
 
 .mockExplorerHead,
@@ -7099,6 +7326,9 @@ p {
 }
 
 .mockExplorerHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
   grid-template-columns: minmax(170px, 1fr) 116px 92px;
   color: #758091;
   font-size: 11px;
@@ -7154,9 +7384,28 @@ p {
 
 .mockFilePreview {
   min-width: 0;
+  overflow-y: auto;
   border-left: 1px solid #dfe3e9;
   padding: 16px;
   background: #f7f9fb;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(112, 124, 140, 0.35) transparent;
+}
+
+.mockExplorerBody main::-webkit-scrollbar,
+.mockFilePreview::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mockExplorerBody main::-webkit-scrollbar-track,
+.mockFilePreview::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mockExplorerBody main::-webkit-scrollbar-thumb,
+.mockFilePreview::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(112, 124, 140, 0.28);
 }
 
 .mockFilePreview small,
@@ -7217,8 +7466,9 @@ p {
   gap: 8px;
   padding: 0 10px;
   color: #eaf1f8;
-  background: rgba(7, 11, 18, 0.86);
-  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(16, 22, 31, 0.68);
+  backdrop-filter: blur(14px);
   font-size: 12px;
   font-weight: 900;
 }
@@ -7229,6 +7479,21 @@ p {
   padding: 7px 10px;
   background: rgba(255, 255, 255, 0.1);
   font-style: normal;
+}
+
+.mockTaskbar span,
+.mockTaskbar i {
+  font-size: 0;
+}
+
+.mockTaskbar span::after {
+  content: "开始";
+  font-size: 12px;
+}
+
+.mockTaskbar i::after {
+  content: "资源管理器";
+  font-size: 12px;
 }
 
 .mockTaskbar b {
@@ -8123,6 +8388,10 @@ p {
   box-shadow: none;
 }
 
+.memoryWechatRoom .memoryBackdropWindow {
+  pointer-events: none;
+}
+
 .memoryWechatRoom .item:hover,
 .memoryWechatRoom .memoryItem:hover,
 .memoryWechatRoom .guidePhoneItem:hover {
@@ -8222,14 +8491,14 @@ p {
 
 .mockPhotoViewer {
   position: absolute;
-  z-index: 8;
-  inset: 8% 5% 9%;
+  z-index: 30;
+  inset: 0;
   display: grid;
   grid-template-rows: 42px minmax(0, 1fr) 34px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 4px;
-  background: #171a1f;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(8, 10, 14, 0.96);
   box-shadow: 0 20px 70px rgba(0, 0, 0, 0.72);
   animation: memoryPhotoOpen 260ms ease-out both;
 }
@@ -8280,17 +8549,17 @@ p {
   display: grid;
   min-height: 0;
   place-items: center;
-  padding: 18px;
+  padding: 14px;
   overflow: hidden;
   background: #0d0f12;
 }
 
 .mockPhotoViewer img {
   display: block;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
   object-fit: contain;
   object-position: center;
 }
