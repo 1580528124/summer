@@ -39,7 +39,7 @@ export function FarewellStage(props: Props) {
                 <section className="momentReactions">
                   <p><b>周也</b>、<b>林小满</b> 赞了这条朋友圈</p>
                   <p><b>林小满：</b>2024 年……好怀念啊。她最近在北京升职了。你俩还有联系吗？</p>
-                  <p><b>我 回复 林小满：</b>很久没联系了。</p>
+                  <p><b>我 回复 林小满：</b>挺久没联系了。</p>
                   <p><b>周也：</b>梧桐大道。你还留着这张啊。</p>
                 </section>
               </div>
@@ -47,7 +47,7 @@ export function FarewellStage(props: Props) {
           </article>
 
           <article className="chatCard">
-            <p className="eyebrow">私聊消息</p>
+            <p className="eyebrow">私聊</p>
             <div className="chat">
               <p className="other">周也：梧桐大道。你还留着这张啊。</p>
               <p className="me">我：留了三年了。每次看到都觉得那时候真好。</p>

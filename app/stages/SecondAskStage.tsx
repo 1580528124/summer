@@ -179,7 +179,7 @@ export function SecondAskStage(props: Props) {
           <aside className="scheduleReplyPanel">
             <header>
               <small>第三阶段 · 节点零 · 2025年8月12日 22:18</small>
-              <strong>她来南京这件事，我这次要怎么接？</strong>
+              <strong>她又回来了，你这次会如何？</strong>
             </header>
             {!activeScheduleBranch ? (
               <>
@@ -229,7 +229,7 @@ export function SecondAskStage(props: Props) {
           <div className="vnChoiceLayer secondAskChoice">
             <button onClick={enterNodeMemories} type="button">
               <i>A</i>
-              <span>继续回到下一个时间点</span>
+              <span>下一个时间点</span>
             </button>
           </div>
         )}

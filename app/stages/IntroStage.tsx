@@ -178,7 +178,7 @@ export function IntroStage(props: Props) {
                     setVnLineIndex(0);
                     setResponseLineIndex(0);
                     setPhase("room");
-                  }} type="button">是。进入回溯</button>
+                  }} type="button">逆转未来</button>
                 </div>
               )}
             </article>

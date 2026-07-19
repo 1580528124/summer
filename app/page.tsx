@@ -55,6 +55,7 @@ export default function Home() {
   const [schedulePresenceChoice, setSchedulePresenceChoice] = useState<SchedulePresenceChoice | null>(null);
   const [memoryControllerJump, setMemoryControllerJump] = useState({ index: 0, nonce: 0 });
   const [thirdStageMusicPlaying, setThirdStageMusicPlaying] = useState(false);
+  const [controllerOpen, setControllerOpen] = useState(false);
 
   const currentNode = nodes[nodeIndex];
   const isThirdStagePhase = phase === "secondAsk" || phase === "nodes";
@@ -324,46 +325,52 @@ export default function Home() {
 
   return (
     <main className="app">
-      <section className="storyController" aria-label="剧情控制器">
-        <div>
-          <p className="eyebrow">剧情控制器</p>
-          <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "记忆校准" : phase === "secondAsk" ? "第三阶段：她来南京" : phase === "nodes" ? `第三阶段：${currentNode.title}` : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾" : "确认"}</strong>
-          <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `当前节点 ${memoryControllerJump.index + 1} / ${memoryCalibrationSteps.length}` : phase === "secondAsk" ? "节点 0 / 3" : phase === "nodes" ? `节点 ${nodeIndex + 1} / ${nodes.length}` : "剧情进行中"}</span>
-        </div>
-        <div className="controllerActions">
-          <button className={phase === "intro" ? "activeControllerAction" : ""} onClick={jumpToIntroStage} type="button">第一阶段</button>
-          <button className={phase === "room" ? "activeControllerAction" : ""} onClick={jumpToMemoryCalibrationStage} type="button">第二阶段</button>
-          {memoryCalibrationSteps.map((label, index) => (
-            <button
-              className={phase === "room" && memoryControllerJump.index === index ? "activeControllerAction" : ""}
-              onClick={() => jumpToMemoryCalibrationStep(index)}
-              type="button"
-              key={label}
-            >
-              {label}
-            </button>
-          ))}
-          <button className={phase === "secondAsk" || phase === "nodes" ? "activeControllerAction" : ""} onClick={() => jumpToThirdStageStep(0)} type="button">第三阶段</button>
-          {thirdStageSteps.map((label, index) => (
-            <button
-              className={(phase === "secondAsk" && index === 0) || (phase === "nodes" && index === nodeIndex + 1) ? "activeControllerAction" : ""}
-              onClick={() => jumpToThirdStageStep(index)}
-              type="button"
-              key={label}
-            >
-              {label}
-            </button>
-          ))}
-          {phase === "intro" && !introPhotoOpen && (
-            <>
-              <button onClick={() => setPackedIntroItems([])} type="button">重置收拾</button>
-              <button disabled={!introPackedDone} onClick={openIntroPhoto} type="button">进入照片</button>
-            </>
-          )}
-          {phase === "intro" && introPhotoOpen && <button onClick={() => setIntroPhotoOpen(false)} type="button">回到房间</button>}
-          <button onClick={resetStory} type="button">重开</button>
-        </div>
-      </section>
+      <button className={cx("controllerToggle", controllerOpen && "open")} onClick={() => setControllerOpen((open) => !open)} type="button">
+        {controllerOpen ? "隐藏控制器" : "剧情控制器"}
+      </button>
+
+      {controllerOpen && (
+        <section className="storyController" aria-label="剧情控制器">
+          <div>
+            <p className="eyebrow">剧情控制器</p>
+            <strong>{phase === "intro" ? introPhotoOpen ? "开场照片" : "收拾宿舍" : phase === "room" ? "记忆校准" : phase === "secondAsk" ? "第三阶段：她来南京" : phase === "nodes" ? `第三阶段：${currentNode.title}` : phase === "farewell" ? "朋友圈与私聊" : phase === "ending" ? "结尾" : "确认"}</strong>
+            <span>{phase === "intro" && !introPhotoOpen ? `已收拾 ${introPackedCount} / ${introPackItems.length}` : phase === "room" ? `当前节点 ${memoryControllerJump.index + 1} / ${memoryCalibrationSteps.length}` : phase === "secondAsk" ? "节点 0 / 3" : phase === "nodes" ? `节点 ${nodeIndex + 1} / ${nodes.length}` : "剧情进行中"}</span>
+          </div>
+          <div className="controllerActions">
+            <button className={phase === "intro" ? "activeControllerAction" : ""} onClick={jumpToIntroStage} type="button">第一阶段</button>
+            <button className={phase === "room" ? "activeControllerAction" : ""} onClick={jumpToMemoryCalibrationStage} type="button">第二阶段</button>
+            {memoryCalibrationSteps.map((label, index) => (
+              <button
+                className={phase === "room" && memoryControllerJump.index === index ? "activeControllerAction" : ""}
+                onClick={() => jumpToMemoryCalibrationStep(index)}
+                type="button"
+                key={label}
+              >
+                {label}
+              </button>
+            ))}
+            <button className={phase === "secondAsk" || phase === "nodes" ? "activeControllerAction" : ""} onClick={() => jumpToThirdStageStep(0)} type="button">第三阶段</button>
+            {thirdStageSteps.map((label, index) => (
+              <button
+                className={(phase === "secondAsk" && index === 0) || (phase === "nodes" && index === nodeIndex + 1) ? "activeControllerAction" : ""}
+                onClick={() => jumpToThirdStageStep(index)}
+                type="button"
+                key={label}
+              >
+                {label}
+              </button>
+            ))}
+            {phase === "intro" && !introPhotoOpen && (
+              <>
+                <button onClick={() => setPackedIntroItems([])} type="button">重置收拾</button>
+                <button disabled={!introPackedDone} onClick={openIntroPhoto} type="button">进入照片</button>
+              </>
+            )}
+            {phase === "intro" && introPhotoOpen && <button onClick={() => setIntroPhotoOpen(false)} type="button">回到房间</button>}
+            <button onClick={resetStory} type="button">重开</button>
+          </div>
+        </section>
+      )}
 
       <audio ref={thirdStageMusicRef} src={thirdStageMusicSrc} loop preload="auto" />
       {isThirdStagePhase && (

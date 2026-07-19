@@ -2,8 +2,8 @@
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "《离别》南京版",
-  description: "根据《离别》剧情完整文档改写的南京版互动叙事原型"
+  title: "Future",
+  description: "Future：关于以后、回忆与重新开口的互动叙事"
 };
 
 export default function RootLayout({
