@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MemoryModal } from "./stages/MemoryModal";
 import { EndingStage } from "./stages/EndingStage";
 import { FarewellStage } from "./stages/FarewellStage";
@@ -11,7 +11,7 @@ import { SecondAskStage } from "./stages/SecondAskStage";
 import { SystemRevealStage } from "./stages/SystemRevealStage";
 import { guidedBeats, introMemories, memories, nodes } from "./story/data";
 import type { ChoiceKey, IntroPackItem, Memory, MemoryId, NodeId, Phase, SchedulePresenceChoice, StoryChoice, VnLine } from "./story/types";
-import { getTransitionText, parseVnLine } from "./story/utils";
+import { cx, getTransitionText, parseVnLine } from "./story/utils";
 
 const memoryCalibrationSteps = [
   "2-1 电脑",
@@ -29,8 +29,10 @@ const thirdStageSteps = [
   "3-2 梧桐路",
   "3-3 南京南站"
 ];
+const thirdStageMusicSrc = "/audio/10-xiao-xing-yun.flac";
 
 export default function Home() {
+  const thirdStageMusicRef = useRef<HTMLAudioElement>(null);
   const [phase, setPhase] = useState<Phase>("intro");
   const [introPhotoOpen, setIntroPhotoOpen] = useState(false);
   const [introPackNarrationVisible, setIntroPackNarrationVisible] = useState(true);
@@ -52,8 +54,10 @@ export default function Home() {
   const [farewellChoice, setFarewellChoice] = useState<string | null>(null);
   const [schedulePresenceChoice, setSchedulePresenceChoice] = useState<SchedulePresenceChoice | null>(null);
   const [memoryControllerJump, setMemoryControllerJump] = useState({ index: 0, nonce: 0 });
+  const [thirdStageMusicPlaying, setThirdStageMusicPlaying] = useState(false);
 
   const currentNode = nodes[nodeIndex];
+  const isThirdStagePhase = phase === "secondAsk" || phase === "nodes";
   const planeChoice = nodeChoices.plane ?? "D";
   const guidedBeat = guidedBeats[seenMemories.length];
   const nodeIntroLines: VnLine[] = [
@@ -109,6 +113,32 @@ export default function Home() {
     : "旧书、文件夹和零碎的小东西还散在房间里。先把它们收进箱子。";
 
   useEffect(() => {
+    const audio = thirdStageMusicRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.3;
+
+    if (!isThirdStagePhase) {
+      audio.pause();
+      setThirdStageMusicPlaying(false);
+      return;
+    }
+
+    const playThirdStageMusic = () => {
+      audio.play()
+        .then(() => setThirdStageMusicPlaying(true))
+        .catch(() => setThirdStageMusicPlaying(false));
+    };
+
+    playThirdStageMusic();
+    window.addEventListener("pointerdown", playThirdStageMusic, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", playThirdStageMusic);
+    };
+  }, [isThirdStagePhase]);
+
+  useEffect(() => {
     if (phase !== "intro" || introPhotoOpen) return;
 
     setIntroPackNarrationVisible(true);
@@ -122,6 +152,21 @@ export default function Home() {
   function openMemory(memory: Memory) {
     setOpenedMemory(memory);
     setSeenMemories((current) => (current.includes(memory.id) ? current : [...current, memory.id]));
+  }
+
+  function toggleThirdStageMusic() {
+    const audio = thirdStageMusicRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play()
+        .then(() => setThirdStageMusicPlaying(true))
+        .catch(() => setThirdStageMusicPlaying(false));
+      return;
+    }
+
+    audio.pause();
+    setThirdStageMusicPlaying(false);
   }
 
   function markMemorySeen(id: MemoryId) {
@@ -319,6 +364,13 @@ export default function Home() {
           <button onClick={resetStory} type="button">重开</button>
         </div>
       </section>
+
+      <audio ref={thirdStageMusicRef} src={thirdStageMusicSrc} loop preload="auto" />
+      {isThirdStagePhase && (
+        <button className={cx("introMusicToggle stageMusicToggle", thirdStageMusicPlaying && "playing")} onClick={toggleThirdStageMusic} type="button">
+          {thirdStageMusicPlaying ? "音乐开" : "音乐关"}
+        </button>
+      )}
 
       {phase === "intro" && (
         <IntroStage

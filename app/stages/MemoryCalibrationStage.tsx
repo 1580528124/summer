@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PhoneMemory } from "../components/PhoneMemory";
 import type { LiveChatMessage, MemoryId, PhoneApp, SchedulePresenceChoice, VnLine } from "../story/types";
 import { cx, speakerLabel } from "../story/utils";
@@ -54,6 +54,7 @@ type ScheduleBranch = {
 const fragmentOrder: StepId[] = ["computer", "phone0", "voice", "phone1", "recycle", "phone2", "phone3"];
 const phoneStepIds: PhoneStepId[] = ["phone0", "phone1", "phone2", "phone3"];
 const phoneDoneText = "聊天记录读取完成：她不是突然累的，你们的话是慢慢变短的。";
+const memoryMusicSrc = "/audio/09-fang-jian.flac";
 
 const chatChapters: ChatChapter[] = [
   {
@@ -299,6 +300,7 @@ const computerFiles: ComputerFile[] = [
 ];
 
 export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice, setSchedulePresenceChoice, setSecondAskLineIndex, setPhase, controllerStepIndex, controllerJumpNonce }: Props) {
+  const memoryMusicRef = useRef<HTMLAudioElement>(null);
   const [activeFragment, setActiveFragment] = useState<FragmentId | null>(null);
   const [fragmentLineIndex, setFragmentLineIndex] = useState(0);
   const [completedFragments, setCompletedFragments] = useState<StepId[]>([]);
@@ -320,6 +322,7 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   const [returnToComputerAfterPhone, setReturnToComputerAfterPhone] = useState(false);
   const [scheduleReplyBeatIndex, setScheduleReplyBeatIndex] = useState(-1);
   const [phoneChapterComplete, setPhoneChapterComplete] = useState(false);
+  const [memoryMusicPlaying, setMemoryMusicPlaying] = useState(false);
 
   const currentFragment = activeFragment ? memoryFragments[activeFragment] : null;
   const currentLine = currentFragment?.lines[Math.min(fragmentLineIndex, Math.max(currentFragment.lines.length - 1, 0))];
@@ -347,6 +350,42 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
         }] : [])
       ]
     : [];
+
+  useEffect(() => {
+    const audio = memoryMusicRef.current;
+    if (!audio) return;
+
+    audio.volume = 0.28;
+
+    const playMemoryMusic = () => {
+      audio.play()
+        .then(() => setMemoryMusicPlaying(true))
+        .catch(() => setMemoryMusicPlaying(false));
+    };
+
+    playMemoryMusic();
+    window.addEventListener("pointerdown", playMemoryMusic, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", playMemoryMusic);
+      audio.pause();
+    };
+  }, []);
+
+  function toggleMemoryMusic() {
+    const audio = memoryMusicRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play()
+        .then(() => setMemoryMusicPlaying(true))
+        .catch(() => setMemoryMusicPlaying(false));
+      return;
+    }
+
+    audio.pause();
+    setMemoryMusicPlaying(false);
+  }
 
   useEffect(() => {
     if (!returnToComputerAfterPhone || !activeScheduleBranch || !activeScheduleBeat || scheduleReactionComplete) return;
@@ -562,6 +601,10 @@ export function MemoryCalibrationStage({ markMemorySeen, schedulePresenceChoice,
   return (
     <>
       <section className="room pixelRoom guidedRoom memoryWechatRoom" aria-label="第二阶段：回溯空间里的宿舍">
+        <audio ref={memoryMusicRef} src={memoryMusicSrc} loop preload="auto" />
+        <button className={cx("introMusicToggle", memoryMusicPlaying && "playing")} onClick={toggleMemoryMusic} type="button">
+          {memoryMusicPlaying ? "音乐开" : "音乐关"}
+        </button>
         <div className="wallGlow" aria-hidden="true" />
         <div className="roomDepth" aria-hidden="true" />
         <div className="bookcase" aria-hidden="true">

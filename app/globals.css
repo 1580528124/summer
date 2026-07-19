@@ -305,6 +305,11 @@ p {
   background: rgba(86, 61, 37, 0.58);
 }
 
+.stageMusicToggle {
+  position: fixed;
+  z-index: 120;
+}
+
 .introPackStage {
   display: grid;
   grid-template-rows: minmax(640px, 1fr);
@@ -3621,6 +3626,7 @@ p {
 }
 
 .secondAskStage {
+  position: relative;
   width: min(1180px, 100%);
   margin: 0 auto;
 }
